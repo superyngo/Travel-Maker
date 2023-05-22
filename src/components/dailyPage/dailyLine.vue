@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import {ref, nextTick, watch, onBeforeUpdate, onMounted, onUpdated} from "vue";
+import {ref, nextTick, onBeforeUpdate, onMounted, onUpdated} from "vue";
 import editNode from "/src/components/dailyPage/editNode.vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";

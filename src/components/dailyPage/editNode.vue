@@ -1,44 +1,78 @@
 <template>
   <div class="container" v-if="node.show">
-    <GoogleMap :idProp="node.id" @pick="pick" :pickable="true"></GoogleMap>
+    <GoogleMap
+      :idProp="node.id"
+      @pick="pick"
+      :pickable="true"
+      :startPlaceId="state.tempNode.place_id"
+    ></GoogleMap>
 
     <br />
     <form method="dialog">
       <!-- <input type="text" placeholder="ID" v-model="state.tempNode.id" /> -->
-      <input type="text" placeholder="Name" v-model="state.tempNode.name" />
-      <select v-model="state.tempNode.type" value="-1">
-        <option selected disabled value="-1">Choose activity Types</option>
-        <option v-for="type of nodeType" :value="type">{{ type }}</option>
-      </select>
+      <label>
+        <span>name:</span>
+        <input type="text" placeholder="Name" v-model="state.tempNode.name"
+      /></label>
 
-      <select v-model="state.tempNode.startTime[0]">
-        <option selected disabled value="-1">Choose start date</option>
-        <option v-for="date of selectedProjectNodesDates" :value="date">
-          {{ date }}
-        </option>
-      </select>
+      <label>
+        <span>type:</span>
+        <select v-model="state.tempNode.type" value="-1">
+          <option selected disabled value="-1">Choose activity Types</option>
+          <option v-for="type of nodeType" :value="type">{{ type }}</option>
+        </select>
+      </label>
 
-      <select v-model="state.tempNode.endTime[0]">
-        <option selected disabled value="-1">Choose end date</option>
-        <option v-for="date of selectedProjectNodesDates" :value="date">
-          {{ date }}
-        </option>
-      </select>
+      <label>
+        <span>place:</span>
+        <input
+          id="autocomplete"
+          type="text"
+          placeholder="地點"
+          v-model="state.tempNode.placename"
+      /></label>
 
-      <input
-        id="autocomplete"
-        type="text"
-        placeholder="地點"
-        v-model="state.tempNode.placename"
-      />
-      <input
-        type="address"
-        placeholder="地址"
-        v-model="state.tempNode.address"
-      />
-      <input type="phone" placeholder="電話" v-model="state.tempNode.phone" />
-      <div>reservation</div>
-      <button type="submit" @click="submit">submit</button>
+      <label>
+        <span>start@:</span>
+        <select v-model="state.tempNode.startTime[0]">
+          <option selected disabled value="-1">Choose start date</option>
+          <option v-for="date of selectedProjectNodesDates" :value="date">
+            {{ date }}
+          </option>
+        </select>
+        <input
+          type="time"
+          v-model="state.tempNode.startTime[1]"
+          step="600000"
+        />
+      </label>
+
+      <label>
+        <span>end@:</span>
+        <select v-model="state.tempNode.endTime[0]">
+          <option selected disabled value="-1">Choose end date</option>
+          <option v-for="date of selectedProjectNodesDates" :value="date">
+            {{ date }}
+          </option>
+          <option value="null"></option>
+        </select>
+        <input type="time" v-model="state.tempNode.endTime[1]" />
+      </label>
+
+      <label>
+        <span>address:</span>
+        <input
+          type="address"
+          placeholder="地址"
+          v-model="state.tempNode.address"
+      /></label>
+
+      <label>
+        <span>phone:</span>
+        <input type="phone" placeholder="電話" v-model="state.tempNode.phone"
+      /></label>
+      <!-- <div>reservation</div> -->
+      <button type="submit" @click.prevent="submit">submit</button>
       <button type="submit" @click="cancel">cancel</button>
       <button @click.prevent="removeNode">remove</button>
     </form>
@@ -78,24 +112,22 @@ onBeforeMount(() => {
   state.tempNode = ProjectsDB.deepCopyFunction(props.node);
 });
 
-onUpdated(async () => {
-  await initMap();
-});
+onUpdated(async () => {});
 
 const pick = function (place) {
   console.log(place);
   const getType = function (placeType) {
     console.log(placeType);
     if (placeType.includes("lodging")) {
-      return "inn";
+      return "Lodging";
     }
     if (placeType.includes("transit_station")) {
-      return "transition";
+      return "Transition";
     }
     if (placeType.includes("food")) {
-      return "meal";
+      return "Food";
     }
-    return "fun";
+    return "Fun";
   };
   state.tempNode.type = getType(place.types);
   state.tempNode.name = state.tempNode.type + "@" + place.name;
@@ -103,6 +135,8 @@ const pick = function (place) {
   state.tempNode.address = place.formatted_address;
   state.tempNode.phone = place.formatted_phone_number;
   state.tempNode.place_id = place.place_id;
+  state.tempNode.geometry = place.geometry.location;
+  state.tempNode.place = place;
 };
 
 const deleteShow = function () {
@@ -111,6 +145,10 @@ const deleteShow = function () {
 };
 
 const submit = function () {
+  if (!state.tempNode.startTime[0] || !state.tempNode.startTime[1]) {
+    alert("Must fill start date and time!!");
+    return;
+  }
   delete refEditNodeModalDom.value[props.node.id].dataset.new;
   SelectedProjectNodes.value[nodeIndex] = ProjectsDB.deepCopyFunction(
     state.tempNode
@@ -146,5 +184,9 @@ const removeNode = function () {
 <style scoped>
 .container {
   border: 1px solid yellow;
+}
+
+label {
+  display: block;
 }
 </style>

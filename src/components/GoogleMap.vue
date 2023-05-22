@@ -85,6 +85,7 @@ const state = reactive({
 const props = defineProps({
   idProp: String,
   pickable: Boolean,
+  startPlaceId: String,
 });
 
 const emits = defineEmits(["choose"]);
@@ -218,6 +219,32 @@ const setMap = async () => {
     props.idProp + "infoWindow-contentDom"
   );
 
+  const getInfo = function (placeId) {
+    placeService.getDetails(
+      {
+        placeId: placeId,
+        fields: [
+          "place_id",
+          "name",
+          "type",
+          "formatted_phone_number",
+          "geometry",
+          "website",
+          "formatted_address",
+          "icon",
+          "rating",
+          "current_opening_hours",
+        ],
+      },
+      (place, status) => {
+        if (status === ProjectsDB.google.maps.places.PlacesServiceStatus.OK) {
+          setInfoWindowContent(place);
+          setMarkerWithInfowindow(place);
+        }
+      }
+    );
+  };
+
   const setInfoWindowContent = function (place) {
     state.infoWindowContent.placeId = place.place_id;
     state.infoWindowContent.placename.value = place.name;
@@ -249,6 +276,10 @@ const setMap = async () => {
     infowindow.setContent(state.infoWindowDom);
     infowindow.open(state.map, chosenPlaceMarker);
   };
+
+  if (props.startPlaceId) {
+    getInfo(props.startPlaceId);
+  }
 
   let markers = [];
 
@@ -341,29 +372,7 @@ const setMap = async () => {
     const placeId = event.placeId;
 
     placeId && // Get place details using the Place ID
-      placeService.getDetails(
-        {
-          placeId: placeId,
-          fields: [
-            "place_id",
-            "name",
-            "type",
-            "formatted_phone_number",
-            "geometry",
-            "website",
-            "formatted_address",
-            "icon",
-            "rating",
-            "current_opening_hours",
-          ],
-        },
-        (place, status) => {
-          if (status === ProjectsDB.google.maps.places.PlacesServiceStatus.OK) {
-            setInfoWindowContent(place);
-            setMarkerWithInfowindow(place);
-          }
-        }
-      );
+      getInfo(placeId);
   });
 
   //travel function https://developers.google.com/maps/documentation/javascript/examples/directions-travel-modes

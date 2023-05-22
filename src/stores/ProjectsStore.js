@@ -44,7 +44,7 @@ export const useProjectsDB = defineStore("mainState", {
             )
           );
     },
-    nodeType: () => ["inn", "meal", "transition", "fun", "reminder"],
+    nodeType: () => ["Lodging", "Food", "Transition", "Fun", "Reminder"],
   },
 
   actions: {
