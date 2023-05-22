@@ -1,0 +1,20 @@
+[
+  {
+    "id": "a00001",
+    "name": "宜蘭二日遊",
+    "destination": "宜蘭",
+    "dateStartEnd": ["2023/4/6", "2023/4/7"],
+    "headCount": 3,
+    "childrenCount": 1,
+    "nodesID": ["b001", "b002", "b003", "b004", "b005"]
+  },
+  {
+    "id": "a00002",
+    "name": "台南二日遊",
+    "destination": "台南",
+    "dateStartEnd": ["2023/5/1", "2023/5/3"],
+    "headCount": 3,
+    "childrenCount": 1,
+    "nodesID": ["b006", "b007", "b008", "b009", "b010"]
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "b001",
+    "name": "吃早餐",
+    "type": "meal",
+    "startTime": [0, "10:01"],
+    "endTime": [0, "11:00"],
+    "geoLocation": "b001latlon",
+    "googleMap": "https://maps.google.com/",
+    "address": "宜蘭縣AA",
+    "phone": "0900000000",
+    "reservation": { "訂位功能": true }
+  },
+  {
+    "id": "b002",
+    "name": "三星博物館",
+    "type": "fun",
+    "startTime": [0, "11:01"],
+    "endTime": [0, "12:00"],
+    "geoLocation": "b001latlon",
+    "googleMap": "https://maps.google.com/",
+    "address": "宜蘭縣AA",
+    "phone": "0900000000",
+    "reservation": { "訂位功能": true }
+  },
+  {
+    "id": "b003",
+    "name": "吃晚餐",
+    "type": "meal",
+    "startTime": [0, "18:01"],
+    "endTime": [0, "17:00"],
+    "geoLocation": "b001latlon",
+    "googleMap": "https://maps.google.com/",
+    "address": "宜蘭縣AA",
+    "phone": "0900000000",
+    "reservation": { "訂位功能": true }
+  },
+  {
+    "id": "b004",
+    "name": "吃早餐",
+    "type": "meal",
+    "startTime": [1, "10:01"],
+    "endTime": [1, "11:00"],
+    "geoLocation": "b001latlon",
+    "googleMap": "https://maps.google.com/",
+    "address": "宜蘭縣AA",
+    "phone": "0900000000",
+    "reservation": { "訂位功能": true }
+  },
+  {
+    "id": "b005",
+    "name": "礁溪溫泉",
+    "type": "fun",
+    "startTime": [1, "15:01"],
+    "endTime": [1, "16:00"],
+    "geoLocation": "b001latlon",
+    "googleMap": "https://maps.google.com/",
+    "address": "宜蘭縣AA",
+    "phone": "0900000000",
+    "reservation": { "訂位功能": true }
+  },
+  {
+    "id": "b006",
+    "name": "租車",
+    "type": "traffic",
+    "startTime": [0, "10:01"],
+    "endTime": [1, "11:00"],
+    "geoLocation": "b001latlon",
+    "googleMap": "https://maps.google.com/",
+    "address": "台南市AA",
+    "phone": "0900000000",
+    "reservation": { "訂位功能": true }
+  },
+  {
+    "id": "b007",
+    "name": "青田百貨",
+    "type": "fun",
+    "startTime": [0, "10:01"],
+    "endTime": [0, "11:00"],
+    "geoLocation": "b001latlon",
+    "googleMap": "https://maps.google.com/",
+    "address": "台南縣AA",
+    "phone": "0900000000",
+    "reservation": { "訂位功能": true }
+  },
+  {
+    "id": "b008",
+    "name": "吃晚餐",
+    "type": "meal",
+    "startTime": [1, "18:01"],
+    "endTime": [1, "18:01"],
+    "geoLocation": "b001latlon",
+    "googleMap": "https://maps.google.com/",
+    "address": "台南縣AA",
+    "phone": "0900000000",
+    "reservation": { "訂位功能": true }
+  },
+  {
+    "id": "b009",
+    "name": "起床",
+    "type": "reminder",
+    "startTime": [1, "7:01"],
+    "endTime": [""],
+    "geoLocation": "b001latlon",
+    "googleMap": "https://maps.google.com/",
+    "address": "台南縣AA",
+    "phone": "0900000000",
+    "reservation": { "訂位功能": true }
+  },
+  {
+    "id": "b010",
+    "name": "租車",
+    "type": "traffic",
+    "startTime": [0, "13:01"],
+    "endTime": [2, "18:01"],
+    "geoLocation": "b001latlon",
+    "googleMap": "https://maps.google.com/",
+    "address": "台南縣AA",
+    "phone": "0900000000",
+    "reservation": { "訂位功能": true }
+  }
+]
