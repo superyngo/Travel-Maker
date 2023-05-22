@@ -1,7 +1,6 @@
 <template>
   <template v-if="selectedDateIndex === currentDayIndex">
     <div class="container">
-      <GoogleMap v-for="i of 1" :idProp="i"></GoogleMap>
       <div class="mainLine"></div>
       <div
         ref="nodes"
@@ -30,8 +29,6 @@ import {ref, nextTick, watch, onBeforeUpdate, onMounted, onUpdated} from "vue";
 import editNode from "/src/components/dailyPage/editNode.vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
-import GoogleMap from "/src/components/GoogleMap.vue";
-
 const props = defineProps({
   currentDayNodes: Object,
   selectedDateIndex: Number || String,

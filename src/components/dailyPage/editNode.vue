@@ -1,6 +1,7 @@
 <template>
   <div class="container" v-if="node.show">
-    <div id="map">123</div>
+    <GoogleMap :idProp="node.id" @pick="pick" :pickable="true"></GoogleMap>
+
     <br />
     <form method="dialog">
       <!-- <input type="text" placeholder="ID" v-model="state.tempNode.id" /> -->
@@ -18,7 +19,7 @@
       </select>
 
       <select v-model="state.tempNode.endTime[0]">
-        <option selected disabled value="-1">Choose start date</option>
+        <option selected disabled value="-1">Choose end date</option>
         <option v-for="date of selectedProjectNodesDates" :value="date">
           {{ date }}
         </option>
@@ -28,9 +29,8 @@
         id="autocomplete"
         type="text"
         placeholder="地點"
-        v-model="state.tempNode.geoLocation"
+        v-model="state.tempNode.placename"
       />
-      <div>pick from googleMaps</div>
       <input
         type="address"
         placeholder="地址"
@@ -49,7 +49,8 @@
 import {reactive, onBeforeMount, onMounted, onUpdated} from "vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
-import {Loader} from "@googlemaps/js-api-loader";
+import GoogleMap from "/src/components/GoogleMap.vue";
+
 const ProjectsDB = useProjectsDB();
 const state = reactive({
   tempNode: {},
@@ -80,6 +81,29 @@ onBeforeMount(() => {
 onUpdated(async () => {
   await initMap();
 });
+
+const pick = function (place) {
+  console.log(place);
+  const getType = function (placeType) {
+    console.log(placeType);
+    if (placeType.includes("lodging")) {
+      return "inn";
+    }
+    if (placeType.includes("transit_station")) {
+      return "transition";
+    }
+    if (placeType.includes("food")) {
+      return "meal";
+    }
+    return "fun";
+  };
+  state.tempNode.type = getType(place.types);
+  state.tempNode.name = state.tempNode.type + "@" + place.name;
+  state.tempNode.placename = place.name;
+  state.tempNode.address = place.formatted_address;
+  state.tempNode.phone = place.formatted_phone_number;
+  state.tempNode.place_id = place.place_id;
+};
 
 const deleteShow = function () {
   refEditNodeModalDom.value[props.node.id].close();
@@ -117,22 +141,6 @@ const removeNode = function () {
     );
   }
 };
-
-const initMap = async () => {
-  const loader = new Loader({
-    apiKey: "AIzaSyAUnQZuVbSFm-UyBkDX9W9atlfFZeKN-DM",
-    version: "weekly",
-    libraries: ["places"],
-    language: "zh-TW",
-  });
-  state.google = await loader.load();
-  state.map = new state.google.maps.Map(document.getElementById("map"), {
-    center: {lat: -34.397, lng: 150.644},
-    zoom: 8,
-  });
-  console.log(state.google);
-};
-if (props.node.show) console.log(123);
 </script>
 
 <style scoped>

@@ -10,8 +10,8 @@
           {{ date }}
         </option>
       </select>
-
       <dailyInfo daily-data=""></dailyInfo>
+      <GoogleMap />
     </div>
     <div class="dailyLine">
       <button class="newNode" @click="newNode">new node</button>
@@ -34,6 +34,8 @@ import {useProjectsDB} from "/src/stores/ProjectsStore.js";
 import {useRoute} from "vue-router";
 import dailyInfo from "/src/components/dailyPage/dailyInfo.vue";
 import dailyLine from "/src/components/dailyPage/dailyLine.vue";
+import GoogleMap from "/src/components/GoogleMap.vue";
+
 const route = useRoute();
 const state = reactive({
   selectedDateIndex: 0,

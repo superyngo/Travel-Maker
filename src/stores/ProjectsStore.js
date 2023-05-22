@@ -44,7 +44,7 @@ export const useProjectsDB = defineStore("mainState", {
             )
           );
     },
-    nodeType: () => ["inn", "meal", "traffic", "fun", "reminder"],
+    nodeType: () => ["inn", "meal", "transition", "fun", "reminder"],
   },
 
   actions: {
@@ -146,7 +146,7 @@ export const useProjectsDB = defineStore("mainState", {
       return new Promise((resolve) => {
         if (navigator.geolocation) {
           let option = {
-            enableAcuracy: true, // 提高精確度
+            enableAcuracy: false, // 提高精確度
             maximumAge: 100000, // 設定上一次位置資訊的有效期限(毫秒)
             timeout: 10000, // 逾時計時器(毫秒)
           };

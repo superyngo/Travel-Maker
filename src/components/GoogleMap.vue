@@ -12,18 +12,24 @@
     <div :id="idProp + 'map'" ref="map" class="map"></div>
 
     <div :id="idProp + 'infoWindow-contentDom'" class="infoWindow-contentDom">
-      <template v-for="item of state.infoWindowContent">
+      <template v-for="item of state.infoWindowContent" :key="item.title">
         <component
           v-if="item.tag === 'a' && item.href"
           :is="item.tag"
           :href="item.href"
           target="_blank"
         >
-          <strong>{{ item.title }}</strong
-          ><span> </span>
+          <strong>{{ item.title }}</strong>
         </component>
-        <component :is="item.tag" v-else-if="item.value && item.tag !== 'a'">
+        <component :is="item.tag" v-else-if="item.tag === 'div'">
           <strong>{{ item.title }}</strong> : {{ item.value }}
+        </component>
+        <component
+          :is="item.tag"
+          v-else-if="item.tag === 'button'"
+          @click="item.click"
+        >
+          <strong>{{ item.value }}</strong>
         </component>
       </template>
     </div>
@@ -45,7 +51,6 @@ const state = reactive({
       tag: "div",
       title: "Address",
       value: null,
-      href: null,
       icon: null,
     },
     phone: {tag: "div", title: "Phone", value: null, href: null, icon: null},
@@ -53,36 +58,36 @@ const state = reactive({
       tag: "div",
       title: "Open on",
       value: null,
-      href: null,
       icon: null,
     },
     rating: {
       tag: "div",
       title: "Rating",
       value: null,
-      href: null,
       icon: null,
     },
     website: {
       tag: "a",
       title: "Website",
       value: "Website",
-      href: null,
       icon: null,
     },
     viewOnGoogleMaps: {
       tag: "a",
       title: "View on Google Maps",
       value: "View on Google Maps",
-      href: null,
       icon: null,
     },
   },
   infoWindowDom: {},
+  choosePlaceInfo: {},
 });
 const props = defineProps({
-  idProp: Number || String,
+  idProp: String,
+  pickable: Boolean,
 });
+
+const emits = defineEmits(["choose"]);
 
 function mapCenterControl(map, clickButton) {
   let centerControlDiv = document.createElement("div");
@@ -107,7 +112,8 @@ function mapCenterControl(map, clickButton) {
   controlText.style.margin = "10px";
   controlText.style.width = "30px";
   controlText.style.height = "30px";
-  controlText.style.backgroundImage = "url('./myLocation.png')";
+  controlText.style.backgroundImage =
+    "url('//maps.google.com/mapfiles/kml/pal3/icon40.png')";
   controlText.style.backgroundSize = "20px 20px";
   controlText.style.backgroundPosition = "0px 0px";
   controlText.style.backgroundRepeat = "no-repeat";
@@ -121,6 +127,37 @@ function mapCenterControl(map, clickButton) {
   controlUI.addEventListener("click", () => clickButton());
 }
 
+const smoothPanTo = function (map, target) {
+  //smooth panTo
+  const start = map.getCenter();
+  const startLat = start.lat();
+  const startLng = start.lng();
+  const targetLat =
+    typeof target.lat === "function" ? target.lat() : target.lat;
+  const targetLng =
+    typeof target.lng === "function" ? target.lng() : target.lng;
+  const steps = 30; // Number of steps in the animation
+  const delay = 0; // Delay between each step (in milliseconds)
+
+  let i = 0;
+  const panStep = () => {
+    i++;
+    const progress = i / steps;
+    const deltaLat = targetLat - startLat;
+    const deltaLng = targetLng - startLng;
+    const newLat = startLat + deltaLat * progress;
+    const newLng = startLng + deltaLng * progress;
+    const newPosition = {lat: newLat, lng: newLng};
+    map.panTo(newPosition);
+
+    if (i < steps) {
+      setTimeout(panStep, delay);
+    }
+  };
+
+  panStep();
+};
+
 const setMap = async () => {
   state.map = new ProjectsDB.google.maps.Map(
     document.getElementById(props.idProp + "map"), //set map to Dom
@@ -130,38 +167,25 @@ const setMap = async () => {
     }
   );
 
-  const smoothPanTo = function (map, target) {
-    //smooth panTo
-    const start = map.getCenter();
-    const startLat = start.lat();
-    const startLng = start.lng();
-    const targetLat = target.lat();
-    const targetLng = target.lng();
-    const steps = 30; // Number of steps in the animation
-    const delay = 0; // Delay between each step (in milliseconds)
+  const myPlaceMarker = new ProjectsDB.google.maps.Marker({
+    //set chosen PlaceMarker
+    clickable: false,
+    icon: new google.maps.MarkerImage(
+      "//maps.gstatic.com/mapfiles/mobile/mobileimgs2.png",
+      new google.maps.Size(22, 22),
+      new google.maps.Point(0, 18),
+      new google.maps.Point(11, 11)
+    ),
+    shadow: null,
+    zIndex: 999,
+    map: state.map,
+  });
 
-    let i = 0;
-    const panStep = () => {
-      i++;
-      const progress = i / steps;
-      const deltaLat = targetLat - startLat;
-      const deltaLng = targetLng - startLng;
-      const newLat = startLat + deltaLat * progress;
-      const newLng = startLng + deltaLng * progress;
-      const newPosition = {lat: newLat, lng: newLng};
-      map.panTo(newPosition);
-
-      if (i < steps) {
-        setTimeout(panStep, delay);
-      }
-    };
-
-    panStep();
-  };
-
-  mapCenterControl(state.map, () =>
-    statemap.setCenter(ProjectsDB.userLocation)
-  );
+  mapCenterControl(state.map, async () => {
+    await ProjectsDB.getCurrentPositionAsync();
+    myPlaceMarker.setPosition(ProjectsDB.userLocation);
+    smoothPanTo(state.map, ProjectsDB.userLocation);
+  });
 
   ProjectsDB.google.maps.event.addListener(
     //set searchbox bounds
@@ -194,8 +218,23 @@ const setMap = async () => {
     props.idProp + "infoWindow-contentDom"
   );
 
+  const setInfoWindowContent = function (place) {
+    state.infoWindowContent.placeId = place.place_id;
+    state.infoWindowContent.placename.value = place.name;
+    state.infoWindowContent.address.value = place.formatted_address;
+    state.infoWindowContent.phone.value = place.formatted_phone_number;
+    state.infoWindowContent.openingTime.value =
+      place.current_opening_hours?.weekday_text.join(" , ");
+    state.infoWindowContent.rating.value = place.rating;
+    state.infoWindowContent.website.href = place.website;
+    state.infoWindowContent.viewOnGoogleMaps.href = `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
+
+    state.infoWindowDom.style.display = "inline";
+  };
+
   const setMarkerWithInfowindow = async function (place) {
     //pin marker with infoWindow
+    state.choosePlaceInfo = place;
     console.log(place);
     smoothPanTo(state.map, place.geometry.location);
     state.map.setZoom(17);
@@ -209,20 +248,6 @@ const setMap = async () => {
 
     infowindow.setContent(state.infoWindowDom);
     infowindow.open(state.map, chosenPlaceMarker);
-  };
-
-  const setInfoWindowContent = function (place) {
-    state.infoWindowContent.placeId = place.place_id;
-    state.infoWindowContent.placename.value = place.name;
-    state.infoWindowContent.address.value = place.formatted_address;
-    state.infoWindowContent.phone.value = place.formatted_phone_number;
-    state.infoWindowContent.openingTime.value =
-      place.current_opening_hours?.weekday_text.join(" , ");
-    state.infoWindowContent.rating.value = place.rating;
-    state.infoWindowContent.website.href = place.website;
-    state.infoWindowContent.viewOnGoogleMaps.href = `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
-
-    state.infoWindowDom.style.display = "inline";
   };
 
   let markers = [];
@@ -314,14 +339,8 @@ const setMap = async () => {
     }
     event.stop();
     const placeId = event.placeId;
-    // setMarkerWithInfowindow({
-    //   place_id: placeId,
-    //   geometry: {location: event.latLng},
-    // });
 
-    // Get place details using the Place ID
-
-    placeId &&
+    placeId && // Get place details using the Place ID
       placeService.getDetails(
         {
           placeId: placeId,
@@ -352,6 +371,17 @@ const setMap = async () => {
 
 onMounted(async () => {
   await ProjectsDB.waitUserLocation();
+  if (props.pickable) {
+    state.infoWindowContent.chooseThisPlace = {
+      tag: "button",
+      title: "Pick this place",
+      value: "Pick this place",
+      click: function pick() {
+        emits("pick", state.choosePlaceInfo);
+      },
+      icon: null,
+    };
+  }
   setMap();
 });
 </script>
@@ -365,9 +395,9 @@ body {
 }
 
 .map {
-  position: absolute;
-  width: 600px;
-  height: 90svh;
+  /* position: absolute; */
+  width: 100%;
+  height: 50svh;
   border: 5px solid black;
   z-index: 1;
 }
