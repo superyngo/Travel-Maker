@@ -145,6 +145,11 @@ export const useProjectsDB = defineStore("mainState", {
       const fallbackPosition = {lat: 25.03746, lng: 121.564558};
       return new Promise((resolve) => {
         if (navigator.geolocation) {
+          let option = {
+            enableAcuracy: true, // 提高精確度
+            maximumAge: 100000, // 設定上一次位置資訊的有效期限(毫秒)
+            timeout: 10000, // 逾時計時器(毫秒)
+          };
           navigator.geolocation.getCurrentPosition(
             (position) => {
               this.userLocation = {
@@ -160,7 +165,8 @@ export const useProjectsDB = defineStore("mainState", {
                 ", use fallback position"
               );
               this.userLocation = fallbackPosition;
-            }
+            },
+            option
           );
         } else {
           console.log(`Geolocation is not supported by this browser.

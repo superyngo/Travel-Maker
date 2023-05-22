@@ -9,7 +9,7 @@
       />
     </div>
 
-    <div :id="idProp + 'map'" ref="map" style="height: 600px"></div>
+    <div :id="idProp + 'map'" ref="map" class="map"></div>
 
     <div :id="idProp + 'infoWindow-contentDom'" class="infoWindow-contentDom">
       <template v-for="item of state.infoWindowContent">
@@ -84,6 +84,43 @@ const props = defineProps({
   idProp: Number || String,
 });
 
+function mapCenterControl(map, clickButton) {
+  let centerControlDiv = document.createElement("div");
+
+  // Set CSS for the control border.
+  let controlUI = document.createElement("button");
+  controlUI.style.backgroundColor = "#fff";
+  controlUI.style.border = "none";
+  controlUI.style.outline = "none";
+  controlUI.style.width = "40px";
+  controlUI.style.height = "40px";
+  controlUI.style.borderRadius = "2px";
+  controlUI.style.boxShadow = "0 1px 4px rgba(0,0,0,0.3)";
+  controlUI.style.cursor = "pointer";
+  controlUI.style.marginRight = "10px";
+  controlUI.style.padding = "0";
+  controlUI.title = "Your Location";
+  centerControlDiv.appendChild(controlUI);
+
+  // Set CSS for the control interior.
+  let controlText = document.createElement("div");
+  controlText.style.margin = "10px";
+  controlText.style.width = "30px";
+  controlText.style.height = "30px";
+  controlText.style.backgroundImage = "url('./myLocation.png')";
+  controlText.style.backgroundSize = "20px 20px";
+  controlText.style.backgroundPosition = "0px 0px";
+  controlText.style.backgroundRepeat = "no-repeat";
+  controlUI.appendChild(controlText);
+
+  // constructor passing in this DIV.
+  centerControlDiv.index = 1; // 排列優先度
+  map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(centerControlDiv); // 設定按鈕加入地圖的位置
+
+  // Setup the click event listeners.
+  controlUI.addEventListener("click", () => clickButton());
+}
+
 const setMap = async () => {
   state.map = new ProjectsDB.google.maps.Map(
     document.getElementById(props.idProp + "map"), //set map to Dom
@@ -121,6 +158,10 @@ const setMap = async () => {
 
     panStep();
   };
+
+  mapCenterControl(state.map, () =>
+    statemap.setCenter(ProjectsDB.userLocation)
+  );
 
   ProjectsDB.google.maps.event.addListener(
     //set searchbox bounds
@@ -306,13 +347,6 @@ const setMap = async () => {
       );
   });
 
-  function openPlaceOnGoogleMaps(placeId) {
-    const url = `https://www.google.com/maps/place/?q=place_id:${placeId}`;
-
-    // Open the URL in a new tab
-    window.open(url, "_blank");
-  }
-
   //travel function https://developers.google.com/maps/documentation/javascript/examples/directions-travel-modes
 };
 
@@ -328,6 +362,14 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+.map {
+  position: absolute;
+  width: 600px;
+  height: 90svh;
+  border: 5px solid black;
+  z-index: 1;
 }
 
 .controls {
