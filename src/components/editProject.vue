@@ -1,5 +1,5 @@
 <template>
-  <form ref="editFormDom" method="dialog">
+  <form>
     <input v-model="state.tempProject.name" placeholder="Project Name" />
     <input v-model="state.tempProject.destination" placeholder="Destination" />
     <input
@@ -23,21 +23,20 @@
       placeholder="End Date"
     />
     <button type="submit" @click.prevent="submit">confirm</button>
-    <button type="submit" formmethod="dialog" @click="cancel">cancel</button>
+    <button type="submit" @click="cancel">cancel</button>
     <button @click.prevent="emits('removeProjectInside')">remove</button>
   </form>
 </template>
 
 <script setup>
-import { reactive, onBeforeMount, ref } from "vue";
-import { useProjectsDB } from "/src/stores/ProjectsStore.js";
+import {reactive, onBeforeMount} from "vue";
+import {useProjectsDB} from "/src/stores/ProjectsStore.js";
 const ProjectsDB = useProjectsDB();
 const state = reactive({
   tempProject: {},
 });
 const emits = defineEmits(["removeProjectInside"]);
-
-const editFormDom = ref(null);
+const props = defineProps({project: Object});
 
 const submit = function () {
   if (
@@ -51,14 +50,15 @@ const submit = function () {
     alert("End Date must be later than Start Date");
     return;
   }
-  delete editFormDom.value.parentElement.dataset.new;
+  delete ProjectsDB.isNewMark[props.project.id];
   ProjectsDB.projectsDB[ProjectsDB.selectedProjectIndex] =
     ProjectsDB.deepCopyFunction(state.tempProject);
-  editFormDom.value.parentElement.close();
+  closeModal();
 };
 
 const cancel = function () {
-  if (editFormDom.value.parentElement.getAttribute("data-new")) {
+  closeModal();
+  if (ProjectsDB.isNewMark[props.project.id]) {
     emits("removeProjectInside");
     initialize();
   } else {
@@ -67,9 +67,11 @@ const cancel = function () {
 };
 
 const initialize = function () {
-  state.tempProject = ProjectsDB.deepCopyFunction(
-    ProjectsDB.projectsDB[ProjectsDB.selectedProjectIndex]
-  );
+  state.tempProject = ProjectsDB.deepCopyFunction(props.project);
+};
+
+const closeModal = function () {
+  delete ProjectsDB.modalIsOpen[props.project.id];
 };
 
 onBeforeMount(() => {

@@ -1,108 +1,127 @@
 <template>
-  <div class="container" v-if="node.show">
+  <div class="container" v-if="modalIsOpen[node.id]">
     <GoogleMap
       :idProp="node.id"
       @pick="pick"
       :pickable="true"
       :startPlaceId="state.tempNode.place_id"
     ></GoogleMap>
+    <hr />
+    <form>
+      <div class="wrapper">
+        <label>
+          <span>Name:</span>
+          <input
+            type="text"
+            placeholder="Activity name"
+            v-model="state.tempNode.name"
+        /></label>
+        <label>
+          <span>Type:</span>
+          <select v-model="state.tempNode.type" value="-1">
+            <option selected disabled value="-1">Select activity type</option>
+            <option v-for="type of nodeType" :value="type" :key="type">
+              {{ type }}
+            </option>
+          </select>
+        </label>
+        <label>
+          <span>Place:</span>
+          <input
+            id="autocomplete"
+            type="text"
+            placeholder="Place"
+            v-model="state.tempNode.placename"
+          />
+        </label>
+      </div>
 
-    <br />
-    <form method="dialog">
-      <!-- <input type="text" placeholder="ID" v-model="state.tempNode.id" /> -->
-      <label>
-        <span>name:</span>
-        <input type="text" placeholder="Name" v-model="state.tempNode.name"
-      /></label>
-
-      <label>
-        <span>type:</span>
-        <select v-model="state.tempNode.type" value="-1">
-          <option selected disabled value="-1">Choose activity Types</option>
-          <option v-for="type of nodeType" :value="type">{{ type }}</option>
-        </select>
-      </label>
-
-      <label>
-        <span>place:</span>
-        <input
-          id="autocomplete"
-          type="text"
-          placeholder="地點"
-          v-model="state.tempNode.placename"
-      /></label>
-
-      <label>
-        <span>start@:</span>
-        <select v-model="state.tempNode.startTime[0]">
-          <option selected disabled value="-1">Choose start date</option>
-          <option v-for="date of selectedProjectNodesDates" :value="date">
-            {{ date }}
-          </option>
-        </select>
-        <input
-          type="time"
+      <div class="wrapper">
+        <label>
+          <span>Start:</span>
+          <select v-model="state.tempNode.startTime[0]">
+            <option selected disabled value="-1">Choose start date</option>
+            <option v-for="date of selectedProjectNodesDates" :value="date">
+              {{ date }}
+            </option>
+          </select>
+        </label>
+        <VueTimepicker
+          format="HH:mm"
+          close-on-complete
+          :minute-interval="10"
           v-model="state.tempNode.startTime[1]"
-          step="600000"
-        />
-      </label>
+        >
+        </VueTimepicker>
 
-      <label>
-        <span>end@:</span>
-        <select v-model="state.tempNode.endTime[0]">
-          <option selected disabled value="-1">Choose end date</option>
-          <option v-for="date of selectedProjectNodesDates" :value="date">
-            {{ date }}
-          </option>
-          <option value="null"></option>
-        </select>
-        <input type="time" v-model="state.tempNode.endTime[1]" />
-      </label>
+        <label>
+          <span>End:</span>
+          <select v-model="state.tempNode.endTime[0]">
+            <option selected disabled value="-1">Choose end date</option>
+            <option v-for="date of selectedProjectNodesDates" :value="date">
+              {{ date }}
+            </option>
+            <option value="null"></option>
+          </select>
+        </label>
+        <VueTimepicker
+          format="HH:mm"
+          close-on-complete
+          :minute-interval="10"
+          v-model="state.tempNode.endTime[1]"
+        >
+        </VueTimepicker>
+      </div>
 
-      <label>
-        <span>address:</span>
-        <input
-          type="address"
-          placeholder="地址"
-          v-model="state.tempNode.address"
-      /></label>
-
-      <label>
-        <span>phone:</span>
-        <input type="phone" placeholder="電話" v-model="state.tempNode.phone"
-      /></label>
+      <div class="wrapper">
+        <label>
+          <span>Address:</span>
+          <input
+            type="address"
+            placeholder="Address"
+            v-model="state.tempNode.address"
+        /></label>
+        <label>
+          <span>Phone:</span>
+          <input
+            type="phone"
+            placeholder="Phone"
+            v-model="state.tempNode.phone"
+        /></label>
+      </div>
       <!-- <div>reservation</div> -->
-      <button type="submit" @click.prevent="submit">submit</button>
-      <button type="submit" @click="cancel">cancel</button>
-      <button @click.prevent="removeNode">remove</button>
+      <div class="wrapper">
+        <div>
+          <button type="submit" @click.prevent="submit">Submit</button>
+          <button type="submit" @click="cancel">Cancel</button>
+          <button @click.prevent="removeNode">Remove</button>
+        </div>
+      </div>
     </form>
   </div>
 </template>
 
 <script setup>
-import {reactive, onBeforeMount, onMounted, onUpdated} from "vue";
+import {reactive, onBeforeMount, onUpdated} from "vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
+import VueTimepicker from "vue3-timepicker/src/VueTimepicker.vue";
 import GoogleMap from "/src/components/GoogleMap.vue";
 
 const ProjectsDB = useProjectsDB();
 const state = reactive({
   tempNode: {},
-  open: false,
-  google: null,
-  map: null,
-  markers: null,
 });
 const {
   //deconstruct ProjectsDB
   SelectedProjectNodes,
-  refEditNodeModalDom,
   nodeType,
   selectedProjectNodesDates,
+  modalIsOpen,
+  isNewMark,
 } = storeToRefs(ProjectsDB);
 const props = defineProps({
   node: Object,
-  open: Boolean,
 });
 const nodeIndex = SelectedProjectNodes.value.findIndex(
   (node) => node.id === props.node.id
@@ -119,15 +138,15 @@ const pick = function (place) {
   const getType = function (placeType) {
     console.log(placeType);
     if (placeType.includes("lodging")) {
-      return "Lodging";
+      return nodeType.value[0];
     }
     if (placeType.includes("transit_station")) {
-      return "Transition";
+      return nodeType.value[2];
     }
     if (placeType.includes("food")) {
-      return "Food";
+      return nodeType.value[1];
     }
-    return "Fun";
+    return nodeType.value[3];
   };
   state.tempNode.type = getType(place.types);
   state.tempNode.name = state.tempNode.type + "@" + place.name;
@@ -139,9 +158,9 @@ const pick = function (place) {
   state.tempNode.place = place;
 };
 
-const deleteShow = function () {
-  refEditNodeModalDom.value[props.node.id].close();
-  delete SelectedProjectNodes.value[nodeIndex].show;
+const closeModel = function () {
+  delete isNewMark.value[props.node.id];
+  delete modalIsOpen.value[props.node.id];
 };
 
 const submit = function () {
@@ -149,30 +168,29 @@ const submit = function () {
     alert("Must fill start date and time!!");
     return;
   }
-  delete refEditNodeModalDom.value[props.node.id].dataset.new;
   SelectedProjectNodes.value[nodeIndex] = ProjectsDB.deepCopyFunction(
     state.tempNode
   );
-  deleteShow();
+  closeModel();
 };
 
 const cancel = function () {
-  if (refEditNodeModalDom.value[props.node.id].getAttribute("data-new")) {
+  if (isNewMark.value[props.node.id]) {
     removeNode();
   } else {
     state.tempNode = ProjectsDB.deepCopyFunction(props.node);
-    deleteShow();
+    closeModel();
   }
 };
 
 const removeNode = function () {
   let handler = () =>
     confirm(`Are you sure you want to remove ${props.node.id}`);
-  if (refEditNodeModalDom.value[props.node.id].getAttribute("data-new")) {
+  if (isNewMark.value[props.node.id]) {
     handler = () => true;
   }
   if (handler()) {
-    refEditNodeModalDom.value[props.node.id].close();
+    closeModel();
     SelectedProjectNodes.value.splice(
       SelectedProjectNodes.value.findIndex((node) => node.id === props.node.id),
       1
@@ -181,12 +199,30 @@ const removeNode = function () {
 };
 </script>
 
-<style scoped>
+<style scoped lan="scss">
 .container {
+  width: 50svw;
   border: 1px solid yellow;
 }
 
+form {
+  display: grid;
+  gap: 5px;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
 label {
-  display: block;
+  /* display: block; */
+}
+
+input,
+select {
+  text-align: center;
+  border: none;
 }
 </style>

@@ -5,11 +5,12 @@ import exportDB from "/src/utils/exportDB.js";
 export const useProjectsDB = defineStore("mainState", {
   state: () => ({
     //定義狀態初始值
+    modalIsOpen: {},
+    isNewMark: {},
     projectsDB: [],
     selectedProjectID: "-1",
     SelectedProjectNodes: [],
     nodesGroupedByDateStart: [],
-    refEditNodeModalDom: null,
     google: {},
     userLocation: {},
     saveOption: {storageType: "localStorage", name: "projectsDB"},
@@ -29,10 +30,12 @@ export const useProjectsDB = defineStore("mainState", {
     },
     selectedProjectNodesDates: function () {
       // the selected project's dates in serial
-      return this.getDatesBetweenDates(
-        this.projectsDB.filter(
-          (project) => project.id === this.selectedProjectID
-        )[0]?.dateStartEnd
+      return (
+        this.getDatesBetweenDates(
+          this.projectsDB.filter(
+            (project) => project.id === this.selectedProjectID
+          )[0]?.dateStartEnd
+        ) || []
       );
     },
     getNodesGroupedByDateStart: function () {
@@ -44,7 +47,7 @@ export const useProjectsDB = defineStore("mainState", {
             )
           );
     },
-    nodeType: () => ["Lodging", "Food", "Transition", "Fun", "Reminder"],
+    nodeType: () => ["🏠", "🍴", "🚗", "🎉", "⁉️"],
   },
 
   actions: {
@@ -131,6 +134,7 @@ export const useProjectsDB = defineStore("mainState", {
       return outObject;
     },
     removeProject() {
+      delete this.modalIsOpen[this.selectedProjectID];
       switch (this.saveOption.storageType) {
         case "localStorage":
           this.projectsDB.splice(this.selectedProjectIndex, 1);

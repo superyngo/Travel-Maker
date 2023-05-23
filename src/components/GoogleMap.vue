@@ -19,9 +19,9 @@
           :href="item.href"
           target="_blank"
         >
-          <strong>{{ item.title }}</strong>
+          <strong>{{ item.value }}</strong>
         </component>
-        <component :is="item.tag" v-else-if="item.tag === 'div'">
+        <component :is="item.tag" v-else-if="item.tag === 'div' && item.value">
           <strong>{{ item.title }}</strong> : {{ item.value }}
         </component>
         <component
@@ -69,13 +69,13 @@ const state = reactive({
     website: {
       tag: "a",
       title: "Website",
-      value: "Website",
+      value: "🔍",
       icon: null,
     },
     viewOnGoogleMaps: {
       tag: "a",
-      title: "View on Google Maps",
-      value: "View on Google Maps",
+      title: "Google Maps",
+      value: "🗺️",
       icon: null,
     },
   },
@@ -134,7 +134,7 @@ const smoothPanTo = function (map, target) {
   const startLat = start.lat();
   const startLng = start.lng();
   const targetLat =
-    typeof target.lat === "function" ? target.lat() : target.lat;
+    (typeof target.lat === "function" ? target.lat() : target.lat) + 0.0012;
   const targetLng =
     typeof target.lng === "function" ? target.lng() : target.lng;
   const steps = 30; // Number of steps in the animation
@@ -165,6 +165,7 @@ const setMap = async () => {
     {
       center: ProjectsDB.userLocation,
       zoom: 15,
+      mapTypeControl: false,
     }
   );
 
@@ -383,8 +384,8 @@ onMounted(async () => {
   if (props.pickable) {
     state.infoWindowContent.chooseThisPlace = {
       tag: "button",
-      title: "Pick this place",
-      value: "Pick this place",
+      title: "Pick",
+      value: "🆗",
       click: function pick() {
         emits("pick", state.choosePlaceInfo);
       },
@@ -396,6 +397,9 @@ onMounted(async () => {
 </script>
 
 <style scoped lan="scss">
+* {
+  box-sizing: border-box;
+}
 html,
 body {
   height: 100%;
@@ -442,6 +446,7 @@ body {
 }
 
 a {
-  margin-right: 5px;
+  margin-right: 10px;
+  /* display: block; */
 }
 </style>

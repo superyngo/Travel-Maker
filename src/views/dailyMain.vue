@@ -1,5 +1,8 @@
 <template>
-  <div id="dailyMain" v-if="selectedProjectID !== '-1'">
+  <div
+    id="dailyMain"
+    v-if="selectedProjectID !== '-1' && selectedProjectNodesDates.length !== 0"
+  >
     <div class="dailyInfo">
       <select v-model="state.selectedDateIndex">
         <option selected disabled value="-1">第幾天</option>
@@ -28,7 +31,7 @@
 </template>
 
 <script setup>
-import {watch, reactive, onBeforeMount, nextTick} from "vue";
+import {watch, reactive, onBeforeMount} from "vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
 import {useRoute} from "vue-router";
@@ -48,7 +51,8 @@ const {
   nodesGroupedByDateStart,
   SelectedProjectNodes,
   selectedProjectNodesDates,
-  refEditNodeModalDom,
+  isNewMark,
+  modalIsOpen,
 } = storeToRefs(ProjectsDB);
 
 const newNode = function () {
@@ -57,23 +61,24 @@ const newNode = function () {
     name: "New activity",
     nodeTypes: "-1",
     address: null,
-    startTime: [selectedProjectNodesDates.value[state.selectedDateIndex]],
+    startTime: [
+      selectedProjectNodesDates.value[state.selectedDateIndex],
+      "12:00",
+    ],
     endTime: [],
     phone: null,
     geoLocation: [],
     googleMap: null,
     childrenCount: null,
     reservation: {},
-    show: true,
   };
   SelectedProjectNodes.value.push(emptyNode);
-  nextTick(() => {
-    refEditNodeModalDom.value[emptyNode.id].showModal();
-    refEditNodeModalDom.value[emptyNode.id].setAttribute("data-new", true);
-  });
+  isNewMark.value[emptyNode.id] = true;
+  modalIsOpen.value[emptyNode.id] = true;
 };
 
 onBeforeMount(() => {
+  //initially fetch nodes data
   selectedProjectID.value === "-1" &&
     (selectedProjectID.value = route.query.ProjectID);
   ProjectsDB.fetchSelectedProjectNodes();

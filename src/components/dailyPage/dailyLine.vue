@@ -5,20 +5,19 @@
       <div
         ref="nodes"
         class="node"
-        v-for="(node, index) of currentDayNodes"
-        :key="index"
+        v-for="node of currentDayNodes"
+        :key="node.id"
       >
-        <button @click="showEditNode(node)">{{ node.name }}</button>
-        <dialog
-          class="editNodeDom"
-          :ref="
-            (el) => {
-              dialog[node.id] = el;
-            }
-          "
-        >
-          <editNode :node="node"></editNode>
-        </dialog>
+        <button @click="modalIsOpen[node.id] = true">
+          {{ node.name }}
+        </button>
+        <teleport to="body">
+          <div class="modal" v-if="modalIsOpen[node.id]">
+            <div class="modalBackground">
+              <editNode :node="node"></editNode>
+            </div>
+          </div>
+        </teleport>
       </div>
     </div>
   </template>
@@ -37,21 +36,10 @@ const props = defineProps({
 const ProjectsDB = useProjectsDB();
 const {
   //deconstruct ProjectsDB
-  refEditNodeModalDom,
-  SelectedProjectNodes,
+  modalIsOpen,
 } = storeToRefs(ProjectsDB);
 
 const nodes = ref(null);
-const dialog = ref({});
-
-const showEditNode = function (thisNode) {
-  dialog.value[thisNode.id].showModal();
-
-  const nodeIndex = SelectedProjectNodes.value.findIndex(
-    (node) => node.id === thisNode.id
-  );
-  SelectedProjectNodes.value[nodeIndex].show = true;
-};
 
 const setNodesPosition = function () {
   //set the nodes position on dailyLine
@@ -65,23 +53,14 @@ const setNodesPosition = function () {
     });
 };
 
-onBeforeUpdate(() => {
-  //reset ref of modal doms
-  props.selectedDateIndex === props.currentDayIndex && (dialog.value = {});
-});
-
 onMounted(() => {
-  //set nodes position && bind dialog dom to store
+  //set nodes position
   setNodesPosition();
-  props.selectedDateIndex === props.currentDayIndex &&
-    (refEditNodeModalDom.value = dialog.value);
 });
 
 onUpdated(() => {
-  //bind dialog dom to store and set the nodes position on dailyLine
+  //set the nodes position on dailyLine
   setNodesPosition();
-  props.selectedDateIndex === props.currentDayIndex &&
-    (refEditNodeModalDom.value = dialog.value);
 });
 </script>
 
