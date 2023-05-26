@@ -1,108 +1,152 @@
 <template>
-  <div class="container" v-if="modalIsOpen[node.id]">
-    <GoogleMap
-      :idProp="node.id"
-      @pick="pick"
-      :pickable="true"
-      :startPlaceId="state.tempNode.place_id"
-    ></GoogleMap>
-    <hr />
-    <form>
-      <div class="wrapper">
-        <label>
-          <span>Name:</span>
-          <input
-            type="text"
-            placeholder="Activity name"
-            v-model="state.tempNode.name"
-        /></label>
-        <label>
-          <span>Type:</span>
-          <select v-model="state.tempNode.type" value="-1">
-            <option selected disabled value="-1">Select activity type</option>
-            <option v-for="type of nodeType" :value="type" :key="type">
-              {{ type }}
-            </option>
-          </select>
-        </label>
-        <label>
-          <span>Place:</span>
-          <input
-            id="autocomplete"
-            type="text"
-            placeholder="Place"
-            v-model="state.tempNode.placename"
-          />
-        </label>
-      </div>
-
-      <div class="wrapper">
-        <label>
-          <span>Start:</span>
-          <select v-model="state.tempNode.startTime[0]">
-            <option selected disabled value="-1">Choose start date</option>
-            <option v-for="date of selectedProjectNodesDates" :value="date">
-              {{ date }}
-            </option>
-          </select>
-        </label>
-        <VueTimepicker
-          format="HH:mm"
-          close-on-complete
-          :minute-interval="10"
-          v-model="state.tempNode.startTime[1]"
-        >
-        </VueTimepicker>
-
-        <label>
-          <span>End:</span>
-          <select v-model="state.tempNode.endTime[0]">
-            <option selected disabled value="-1">Choose end date</option>
-            <option v-for="date of selectedProjectNodesDates" :value="date">
-              {{ date }}
-            </option>
-            <option value="null"></option>
-          </select>
-        </label>
-        <VueTimepicker
-          format="HH:mm"
-          close-on-complete
-          :minute-interval="10"
-          v-model="state.tempNode.endTime[1]"
-        >
-        </VueTimepicker>
-      </div>
-
-      <div class="wrapper">
-        <label>
-          <span>Address:</span>
-          <input
-            type="address"
-            placeholder="Address"
-            v-model="state.tempNode.address"
-        /></label>
-        <label>
-          <span>Phone:</span>
-          <input
-            type="phone"
-            placeholder="Phone"
-            v-model="state.tempNode.phone"
-        /></label>
-      </div>
-      <!-- <div>reservation</div> -->
-      <div class="wrapper">
-        <div>
-          <button type="submit" @click.prevent="submit">Submit</button>
-          <button type="submit" @click="cancel">Cancel</button>
-          <button @click.prevent="removeNode">Remove</button>
+  <teleport to="body" v-if="modalIsOpen[node.id]">
+    <div class="modal">
+      <div class="modalBackground">
+        <div class="editWrapper">
+          <GoogleMap
+            :idProp="node.id"
+            @pick="pick"
+            :pickable="true"
+            :startPlaceId="state.tempNode.place_id"
+          ></GoogleMap>
+          <form class="editForm">
+            <div class="firstWrapper innerWrappers">
+              <label class="label2">
+                <span>Name:</span>
+                <input
+                  type="text"
+                  placeholder="Activity name"
+                  v-model="state.tempNode.name"
+              /></label>
+              <label class="label2">
+                <span>Type:</span>
+                <select
+                  v-model="state.tempNode.type"
+                  value="-1"
+                  style="font-size: 1rem"
+                >
+                  <option selected disabled value="-1">
+                    Select activity type
+                  </option>
+                  <option v-for="type of nodeType" :value="type" :key="type">
+                    {{ type }}
+                  </option>
+                </select>
+              </label>
+              <label class="label2">
+                <span>Place:</span>
+                <input
+                  type="text"
+                  placeholder="Place"
+                  v-model="state.tempNode.placename"
+                />
+              </label>
+            </div>
+            <div class="secondWrapper innerWrappers">
+              <div class="timeWrapper">
+                <label class="label15">
+                  <span>start:</span>
+                  <select v-model="state.tempNode.startTime[0]">
+                    <option selected disabled value="-1">
+                      Choose start date
+                    </option>
+                    <option
+                      v-for="date of selectedProjectNodesDates"
+                      :value="date"
+                    >
+                      {{ date }}
+                    </option>
+                  </select>
+                </label>
+                <div class="label15">
+                  <VueTimepicker
+                    auto-scroll
+                    input-width="90%"
+                    format="HH:mm"
+                    close-on-complete
+                    :minute-interval="10"
+                    v-model="state.tempNode.startTime[1]"
+                  />
+                </div>
+              </div>
+              <div class="timeWrapper">
+                <label class="label15">
+                  <span>end:</span>
+                  <select v-model="state.tempNode.endTime[0]">
+                    <option selected disabled value="-1">
+                      Choose end date
+                    </option>
+                    <option
+                      v-for="date of selectedProjectNodesDates"
+                      :value="date"
+                    >
+                      {{ date }}
+                    </option>
+                    <option value="null"></option>
+                  </select>
+                </label>
+                <div class="label15">
+                  <VueTimepicker
+                    auto-scroll
+                    input-width="90%"
+                    format="HH:mm"
+                    close-on-complete
+                    :minute-interval="10"
+                    v-model="state.tempNode.endTime[1]"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="thirdWrapper innerWrappers">
+              <label class="label2">
+                <span>📫:</span>
+                <input
+                  type="address"
+                  placeholder="Address"
+                  v-model="state.tempNode.address"
+              /></label>
+              <label class="label2">
+                <span>☎️:</span>
+                <input
+                  type="phone"
+                  placeholder="Phone"
+                  v-model="state.tempNode.phone"
+              /></label>
+              <label class="label2">
+                <span>📝:</span>
+                <textarea
+                  placeholder="memo"
+                  v-model="state.tempNode.memo"
+                ></textarea>
+              </label>
+            </div>
+            <div class="buttonWrapper">
+              <button type="submit" @click.prevent="submit">🆗</button>
+              <button type="submit" @click="cancel">❎</button>
+              <button @click.prevent="removeNode">
+                <svg
+                  style="width: 1rem; display: block"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 448 512"
+                >
+                  <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                  <path
+                    fill="currentColor"
+                    style="color: var(--visual-secondary)"
+                    d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-    </form>
-  </div>
+    </div>
+  </teleport>
 </template>
 
 <script setup>
-import {reactive, onBeforeMount, onUpdated} from "vue";
+import {reactive, onBeforeMount} from "vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
 import VueTimepicker from "vue3-timepicker/src/VueTimepicker.vue";
@@ -130,8 +174,6 @@ const nodeIndex = SelectedProjectNodes.value.findIndex(
 onBeforeMount(() => {
   state.tempNode = ProjectsDB.deepCopyFunction(props.node);
 });
-
-onUpdated(async () => {});
 
 const pick = function (place) {
   console.log(place);
@@ -164,23 +206,47 @@ const closeModel = function () {
 };
 
 const submit = function () {
-  if (!state.tempNode.startTime[0] || !state.tempNode.startTime[1]) {
+  if (!state.tempNode.startTime[0]) {
     alert("Must fill start date and time!!");
     return;
   }
-  SelectedProjectNodes.value[nodeIndex] = ProjectsDB.deepCopyFunction(
-    state.tempNode
-  );
-  closeModel();
+
+  if (
+    state.tempNode.startTime[1].includes("HH") ||
+    state.tempNode.startTime[1].includes("mm")
+  ) {
+    alert("Start time must be complete");
+    return;
+  }
+  if (typeof state.tempNode.endTime[1] === "object") {
+    state.tempNode.endTime[1] =
+      state.tempNode.endTime[1].HH + ":" + state.tempNode.endTime[1].mm;
+  }
+  console.log(state.tempNode.startTime[1]);
+  console.log(state.tempNode.endTime[1]);
+  console.log(state.tempNode.endTime[1].includes("HH"));
+  if (
+    (state.tempNode.endTime[1].length === 5 ||
+      state.tempNode.endTime[1] === "") &&
+    !state.tempNode.endTime[1].includes("HH") &&
+    !state.tempNode.endTime[1].includes("mm")
+  ) {
+    SelectedProjectNodes.value[nodeIndex] = ProjectsDB.deepCopyFunction(
+      state.tempNode
+    );
+    closeModel();
+    return;
+  }
+  alert("Time must be complete");
 };
 
 const cancel = function () {
   if (isNewMark.value[props.node.id]) {
     removeNode();
-  } else {
-    state.tempNode = ProjectsDB.deepCopyFunction(props.node);
-    closeModel();
+    return;
   }
+  state.tempNode = ProjectsDB.deepCopyFunction(props.node);
+  closeModel();
 };
 
 const removeNode = function () {
@@ -199,30 +265,70 @@ const removeNode = function () {
 };
 </script>
 
-<style scoped lan="scss">
-.container {
-  width: 50svw;
-  border: 1px solid yellow;
-}
-
-form {
+<style scoped>
+.editForm {
   display: grid;
-  gap: 5px;
-}
-
-.wrapper {
-  display: flex;
-  justify-content: space-evenly;
+  gap: 0.5rem;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 3fr 1fr;
   align-items: center;
 }
-
-label {
-  /* display: block; */
+.editForm input,
+.editForm select,
+.editForm textarea {
+  width: 80%;
+  text-align: center;
+  background-color: transparent;
+  border: none;
 }
 
-input,
-select {
-  text-align: center;
+.editForm input:focus,
+.editForm select:focus {
+  outline: 1px solid;
+  z-index: 1;
+}
+.editForm label {
+  display: flex;
+}
+.label2 {
+  height: 3rem;
+  line-height: 3rem;
+}
+.label15 {
+  height: 2.5rem;
+  line-height: 2.5rem;
+}
+.label3 {
+  height: 4.5rem;
+  line-height: 4.5rem;
+}
+.innerWrappers {
+  display: flex;
+  flex-direction: column;
+}
+
+.editWrapper {
+  height: 90svh;
+  width: 90svw;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 3fr 1fr;
+  gap: 0.5rem;
+}
+.buttonWrapper {
+  display: flex;
+  gap: 1rem;
+  grid-row: 2 / span 1;
+  grid-column: 1 / span 3;
+  justify-self: center;
+}
+.buttonWrapper button {
+  cursor: pointer;
+  font-size: 1.5rem;
+  background-color: transparent;
   border: none;
+}
+.buttonWrapper button:hover {
+  scale: 1.2;
 }
 </style>

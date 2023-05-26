@@ -9,8 +9,10 @@ export const useProjectsDB = defineStore("mainState", {
     isNewMark: {},
     projectsDB: [],
     selectedProjectID: "-1",
-    SelectedProjectNodes: [],
+    SelectedProjectNodes: null,
+    selectedDateIndex: 0,
     nodesGroupedByDateStart: [],
+    nodesGroupedByDateEnd: [],
     google: {},
     userLocation: {},
     saveOption: {storageType: "localStorage", name: "projectsDB"},
@@ -23,6 +25,9 @@ export const useProjectsDB = defineStore("mainState", {
         (project) => project.id === this.selectedProjectID
       );
     },
+    selectedProject: function () {
+      return this.projectsDB[this.selectedProjectIndex];
+    },
     selectedProjectNodesID: function () {
       return this.projectsDB.filter(
         (project) => project.id === this.selectedProjectID
@@ -30,6 +35,9 @@ export const useProjectsDB = defineStore("mainState", {
     },
     selectedProjectNodesDates: function () {
       // the selected project's dates in serial
+      if (this.selectedProjectID === "-1") {
+        return;
+      }
       return (
         this.getDatesBetweenDates(
           this.projectsDB.filter(
@@ -38,14 +46,49 @@ export const useProjectsDB = defineStore("mainState", {
         ) || []
       );
     },
-    getNodesGroupedByDateStart: function () {
-      return this.SelectedProjectNodes.length === 0
-        ? {}
-        : this.selectedProjectNodesDates.map((date) =>
-            this.SelectedProjectNodes.filter(
-              (node) => node.startTime[0] === date
-            )
-          );
+    getNodesGroupedByDateStartEnd: function () {
+      if (
+        !this.SelectedProjectNodes ||
+        this.SelectedProjectNodes.length === 0
+      ) {
+        return [[], []];
+      }
+      const start = this.selectedProjectNodesDates
+        .map((date) =>
+          this.SelectedProjectNodes.filter((node) => node.startTime[0] === date)
+        )
+        .map((date) => {
+          date.sort((a, b) => {
+            new Date(`1970/01/01 ${a.startTime[1]}`);
+            return (
+              new Date(`1970/01/01 ${a.startTime[1]}`) -
+              new Date(`1970/01/01 ${b.startTime[1]}`)
+            );
+          });
+          return date;
+        });
+      const end = this.selectedProjectNodesDates
+        .map((date) =>
+          this.SelectedProjectNodes.filter((node) => node.endTime[0] === date)
+        )
+        .map((date) => {
+          date.sort((a, b) => {
+            new Date(`1970/01/01 ${a.startTime[1]}`);
+            return (
+              new Date(`1970/01/01 ${a.startTime[1]}`) -
+              new Date(`1970/01/01 ${b.startTime[1]}`)
+            );
+          });
+          return date;
+        });
+
+      return [start, end];
+    },
+    selectedDateStartNodes: function () {
+      return this.nodesGroupedByDateStart[this.selectedDateIndex];
+    },
+    selectedDateEndNodes: function () {
+      return this.nodesGroupedByDateEnd[this.selectedDateIndex];
     },
     nodeType: () => ["🏠", "🍴", "🚗", "🎉", "⁉️"],
   },
@@ -62,25 +105,29 @@ export const useProjectsDB = defineStore("mainState", {
     },
     async fetchSelectedProjectNodes() {
       //fetch selected project's nodes
-      const filteredNodeDB = await fetchDB.fetchSelectedNodesDB(
+      const selectedProjectNodesDB = await fetchDB.fetchSelectedNodesDB(
         this.saveOption.storageType,
         this.selectedProjectID
       );
       //map date
-      this.SelectedProjectNodes = filteredNodeDB
-        ? filteredNodeDB.map((node) => {
-            //map right time
-            [node.startTime[0], node.endTime[0]] = [
-              this.selectedProjectNodesDates[node.startTime[0]],
-              this.selectedProjectNodesDates[node.endTime[0]],
-            ];
-            return node;
-          })
-        : [];
-      //split by dates and assign to nodesGroupedByDateStart
-      this.nodesGroupedByDateStart = filteredNodeDB
-        ? this.getNodesGroupedByDateStart
-        : [];
+      if (!selectedProjectNodesDB || selectedProjectNodesDB.length === 0) {
+        this.SelectedProjectNodes = [];
+        return;
+      }
+      this.SelectedProjectNodes = selectedProjectNodesDB.map((node) => {
+        //map right time
+        [node.startTime[0], node.endTime[0]] = [
+          this.selectedProjectNodesDates[node.startTime[0]],
+          this.selectedProjectNodesDates[node.endTime[0]],
+        ];
+        return node;
+      });
+      //split by dates and assign to nodesGroupedByDateStart and End
+      [this.nodesGroupedByDateStart, this.nodesGroupedByDateEnd] = [
+        this.getNodesGroupedByDateStartEnd[0],
+        this.getNodesGroupedByDateStartEnd[1],
+      ];
+      this.selectedDateIndex = 0;
     },
     exportProjectDB() {
       exportDB.exportData(
@@ -91,13 +138,17 @@ export const useProjectsDB = defineStore("mainState", {
     },
     exportNodesDB() {
       const flatArray = this.deepCopyFunction(this.SelectedProjectNodes);
-      const mapTimeResult = flatArray.map((node) => {
-        [node.startTime[0], node.endTime[0]] = [
-          this.selectedProjectNodesDates.indexOf(node.startTime[0]),
-          this.selectedProjectNodesDates.indexOf(node.endTime[0]),
-        ];
-        return node;
-      });
+      console.log(flatArray);
+      let mapTimeResult = [];
+      if (flatArray) {
+        mapTimeResult = flatArray.map((node) => {
+          [node.startTime[0], node.endTime[0]] = [
+            this.selectedProjectNodesDates.indexOf(node.startTime[0]),
+            this.selectedProjectNodesDates.indexOf(node.endTime[0]),
+          ];
+          return node;
+        });
+      }
       exportDB.exportData(
         "localStorage",
         mapTimeResult,
@@ -107,7 +158,11 @@ export const useProjectsDB = defineStore("mainState", {
       this.projectsDB[this.selectedProjectIndex].nodesID = mapTimeResult.map(
         (node) => node.id
       );
-      this.nodesGroupedByDateStart = this.getNodesGroupedByDateStart;
+      //save modified nodes back to state
+      [this.nodesGroupedByDateStart, this.nodesGroupedByDateEnd] = [
+        this.getNodesGroupedByDateStartEnd[0],
+        this.getNodesGroupedByDateStartEnd[1],
+      ];
     },
     getDatesBetweenDates([startDate, endDate]) {
       if (startDate === undefined) return;
@@ -134,15 +189,25 @@ export const useProjectsDB = defineStore("mainState", {
       return outObject;
     },
     removeProject() {
-      delete this.modalIsOpen[this.selectedProjectID];
-      switch (this.saveOption.storageType) {
-        case "localStorage":
-          this.projectsDB.splice(this.selectedProjectIndex, 1);
-          localStorage.removeItem(this.selectedProjectID);
-          break;
-        case "DB":
-          //manpulate DB
-          break;
+      if (this.selectedProjectID === "-1") return;
+      let handler = () =>
+        confirm("Are you sure you want to remove this project");
+      if (this.isNewMark[this.selectedProjectID]) {
+        delete this.isNewMark[this.selectedProjectID];
+        handler = () => true;
+      }
+      if (handler()) {
+        delete this.modalIsOpen[this.selectedProjectID];
+        switch (this.saveOption.storageType) {
+          case "localStorage":
+            this.projectsDB.splice(this.selectedProjectIndex, 1);
+            localStorage.removeItem(this.selectedProjectID);
+            this.selectedProjectID = "-1";
+            break;
+          case "DB":
+            //manpulate DB
+            break;
+        }
       }
     },
     getCurrentPositionAsync() {
@@ -194,14 +259,6 @@ export const useProjectsDB = defineStore("mainState", {
         }, 10000); // Maximum wait time (adjust as needed)
       });
     },
-    // async pause(milliseconds) {
-    //   const wait = () => {
-    //     return new Promise((resolve) => {
-    //       setTimeout(resolve, milliseconds);
-    //     });
-    //   };
-    //   await wait();
-    // },
   },
 });
 

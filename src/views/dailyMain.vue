@@ -1,81 +1,69 @@
 <template>
-  <div
-    id="dailyMain"
-    v-if="selectedProjectID !== '-1' && selectedProjectNodesDates.length !== 0"
-  >
-    <div class="dailyInfo">
-      <select v-model="state.selectedDateIndex">
-        <option selected disabled value="-1">第幾天</option>
-        <option
-          v-for="(date, index) of selectedProjectNodesDates"
-          :value="index"
-        >
-          {{ date }}
-        </option>
-      </select>
-      <dailyInfo daily-data=""></dailyInfo>
-      <GoogleMap />
+  <div class="dailyMainContainer" v-if="selectedProjectID !== '-1'">
+    <div class="dailyPanel">
+      <div class="upper">
+        <div class="selectPanel">
+          <span class="emoji" style="font-size: 1.7rem; line-height: 1.6rem"
+            >🗓</span
+          >
+          <select v-model="selectedDateIndex" class="dateSelect">
+            <option selected disabled value="-1">Date</option>
+            <option
+              v-for="(date, index) of selectedProjectNodesDates"
+              :value="index"
+            >
+              {{ date }}
+            </option>
+          </select>
+          <div class="selectedDateButton">
+            <button
+              @click="
+                selectedDateIndex > 0 ? selectedDateIndex-- : selectedDateIndex
+              "
+            >
+              ⬅️
+            </button>
+            <button
+              @click="
+                selectedDateIndex < selectedProjectNodesDates.length - 1
+                  ? selectedDateIndex++
+                  : selectedDateIndex
+              "
+            >
+              ➡️
+            </button>
+          </div>
+        </div>
+        <dailyInfo></dailyInfo>
+      </div>
+      <div class="downer">
+        <dailyBrief></dailyBrief>
+      </div>
     </div>
     <div class="dailyLine">
-      <button class="newNode" @click="newNode">new node</button>
-      <dailyLine
-        v-for="(nodesByDate, index) of nodesGroupedByDateStart"
-        :currentDayNodes="nodesByDate"
-        :currentDayIndex="index"
-        :selectedDateIndex="Number(state.selectedDateIndex)"
-        :key="index"
-      />
+      <dailyLine />
     </div>
-    <div class="mainBoard"></div>
   </div>
 </template>
 
 <script setup>
-import {watch, reactive, onBeforeMount} from "vue";
+import {watch, onBeforeMount, watchEffect} from "vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
 import {useRoute} from "vue-router";
 import dailyInfo from "/src/components/dailyPage/dailyInfo.vue";
 import dailyLine from "/src/components/dailyPage/dailyLine.vue";
-import GoogleMap from "/src/components/GoogleMap.vue";
+import dailyBrief from "/src/components/dailyPage/dailyBrief.vue";
 
 const route = useRoute();
-const state = reactive({
-  selectedDateIndex: 0,
-  saveData: {storageType: "localStorage"},
-});
 const ProjectsDB = useProjectsDB();
 const {
   //deconstruct ProjectsDB
   selectedProjectID,
-  nodesGroupedByDateStart,
   SelectedProjectNodes,
   selectedProjectNodesDates,
-  isNewMark,
-  modalIsOpen,
+  selectedDateIndex,
 } = storeToRefs(ProjectsDB);
-
-const newNode = function () {
-  const emptyNode = {
-    id: crypto.randomUUID(),
-    name: "New activity",
-    nodeTypes: "-1",
-    address: null,
-    startTime: [
-      selectedProjectNodesDates.value[state.selectedDateIndex],
-      "12:00",
-    ],
-    endTime: [],
-    phone: null,
-    geoLocation: [],
-    googleMap: null,
-    childrenCount: null,
-    reservation: {},
-  };
-  SelectedProjectNodes.value.push(emptyNode);
-  isNewMark.value[emptyNode.id] = true;
-  modalIsOpen.value[emptyNode.id] = true;
-};
 
 onBeforeMount(() => {
   //initially fetch nodes data
@@ -91,14 +79,14 @@ watch(
     if (newValue === "-1") return;
     console.log("Selected project changed");
     ProjectsDB.fetchSelectedProjectNodes();
-    state.selectedDateIndex = 0;
   }
 );
 
 watch(
   //save nodes data when nodes data changed
   () => SelectedProjectNodes.value,
-  (newValue) => {
+  () => {
+    if (selectedProjectID.value === "-1") return;
     //save nodes data
     console.log(`node ${selectedProjectID.value} nodes data was changed`);
     ProjectsDB.exportNodesDB();
@@ -107,19 +95,60 @@ watch(
 );
 </script>
 
-<style lan="scss">
-#dailyMain {
+<style>
+.dailyMainContainer {
+  padding: 1rem;
   width: 100%;
   height: 100svh;
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: 1fr 3fr;
-  align-items: center;
-  > * {
-    border: 1px solid black;
-  }
-  > .dailyLine {
-    grid-row-start: span 2;
-  }
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+  color: var(--text-secondary);
+}
+.dailyMainContainer select,
+.dailyMainContainer option,
+.dailyMainContainer button {
+  color: var(--text-secondary);
+}
+.emoji {
+  display: inline-block;
+  width: 2rem;
+  color: var(--visual-secondary);
+  font-weight: 700;
+}
+.dailyPanel {
+  display: grid;
+  height: 100%;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 2fr;
+}
+.selectPanel {
+  position: relative;
+  width: 100%;
+  height: 2rem;
+}
+.dateSelect {
+  position: absolute;
+  height: 100%;
+  border: none;
+  z-index: 0;
+}
+.selectedDateButton {
+  position: absolute;
+  left: 8rem;
+  top: 0.1rem;
+}
+.selectedDateButton button {
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  font-size: 1rem;
+}
+.dailyMainContainer button:hover {
+  scale: 1.1;
+}
+.dailyMainContainer button:active {
+  scale: 0.9;
 }
 </style>

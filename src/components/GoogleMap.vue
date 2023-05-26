@@ -1,5 +1,5 @@
 <template>
-  <div wrapper>
+  <div class="mapWrapper">
     <div style="display: none">
       <input
         :id="idProp + 'pac-input'"
@@ -13,47 +13,52 @@
 
     <div :id="idProp + 'infoWindow-contentDom'" class="infoWindow-contentDom">
       <template v-for="item of state.infoWindowContent" :key="item.title">
-        <component
-          v-if="item.tag === 'a' && item.href"
-          :is="item.tag"
-          :href="item.href"
-          target="_blank"
-        >
-          <strong>{{ item.value }}</strong>
-        </component>
-        <component :is="item.tag" v-else-if="item.tag === 'div' && item.value">
+        <span v-if="item.tag === 'a' && item.href" class="clickableSpan">
+          <component
+            :is="item.tag"
+            :href="item.href"
+            target="_blank"
+            class="clickableContentItem"
+          >
+            <strong>{{ item.value }}</strong>
+          </component>
+        </span>
+        <component :is="item.tag" v-if="item.tag === 'div' && item.value">
           <strong>{{ item.title }}</strong> : {{ item.value }}
         </component>
-        <component
-          :is="item.tag"
-          v-else-if="item.tag === 'button'"
-          @click="item.click"
-        >
-          <strong>{{ item.value }}</strong>
-        </component>
+        <span v-if="item.tag === 'button'" class="clickableSpan">
+          <component
+            :is="item.tag"
+            @click="item.click"
+            class="clickableContentItem"
+          >
+            <strong>{{ item.value }}</strong>
+          </component>
+        </span>
       </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
 const ProjectsDB = useProjectsDB();
+const map = ref(null);
 
 const state = reactive({
   map: null,
   markers: null,
   editMode: false,
   infoWindowContent: {
-    placename: {tag: "div", title: "Name", value: null, href: null, icon: null},
+    placename: {tag: "div", title: "Name", value: null, icon: null},
     address: {
       tag: "div",
       title: "Address",
       value: null,
       icon: null,
     },
-    phone: {tag: "div", title: "Phone", value: null, href: null, icon: null},
+    phone: {tag: "div", title: "Phone", value: null, icon: null},
     openingTime: {
       tag: "div",
       title: "Open on",
@@ -71,12 +76,14 @@ const state = reactive({
       title: "Website",
       value: "🔍",
       icon: null,
+      href: null,
     },
     viewOnGoogleMaps: {
       tag: "a",
       title: "Google Maps",
       value: "🗺️",
       icon: null,
+      href: null,
     },
   },
   infoWindowDom: {},
@@ -128,13 +135,14 @@ function mapCenterControl(map, clickButton) {
   controlUI.addEventListener("click", () => clickButton());
 }
 
-const smoothPanTo = function (map, target) {
+const smoothPanTo = function (map, target, isCenter) {
   //smooth panTo
   const start = map.getCenter();
   const startLat = start.lat();
   const startLng = start.lng();
   const targetLat =
-    (typeof target.lat === "function" ? target.lat() : target.lat) + 0.0012;
+    (typeof target.lat === "function" ? target.lat() : target.lat) +
+    (isCenter ? 0 : 0.0012);
   const targetLng =
     typeof target.lng === "function" ? target.lng() : target.lng;
   const steps = 30; // Number of steps in the animation
@@ -161,7 +169,7 @@ const smoothPanTo = function (map, target) {
 
 const setMap = async () => {
   state.map = new ProjectsDB.google.maps.Map(
-    document.getElementById(props.idProp + "map"), //set map to Dom
+    map.value, //set map to Dom
     {
       center: ProjectsDB.userLocation,
       zoom: 15,
@@ -184,9 +192,10 @@ const setMap = async () => {
   });
 
   mapCenterControl(state.map, async () => {
+    //bind my place button
     await ProjectsDB.getCurrentPositionAsync();
     myPlaceMarker.setPosition(ProjectsDB.userLocation);
-    smoothPanTo(state.map, ProjectsDB.userLocation);
+    smoothPanTo(state.map, ProjectsDB.userLocation, true);
   });
 
   ProjectsDB.google.maps.event.addListener(
@@ -273,6 +282,9 @@ const setMap = async () => {
       location: place.geometry.location,
     });
     chosenPlaceMarker.setVisible(true);
+    chosenPlaceMarker.addListener("click", () => {
+      infowindow.open(state.map);
+    });
 
     infowindow.setContent(state.infoWindowDom);
     infowindow.open(state.map, chosenPlaceMarker);
@@ -396,22 +408,15 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped lan="scss">
-* {
-  box-sizing: border-box;
-}
-html,
-body {
+<style scoped>
+.mapWrapper {
   height: 100%;
-  margin: 0;
-  padding: 0;
+  border: 1px solid black;
 }
-
 .map {
-  /* position: absolute; */
   width: 100%;
-  height: 50svh;
-  border: 5px solid black;
+  height: 100%;
+  /* border: 5px solid black; */
   z-index: 1;
 }
 
@@ -443,6 +448,29 @@ body {
 
 .infoWindow-contentDom {
   display: none;
+}
+.clickableSpan {
+  margin-top: 0.5rem;
+  position: relative;
+  display: inline-block;
+  height: 2rem;
+  width: 2rem;
+}
+.clickableContentItem {
+  position: absolute;
+  left: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  height: 2rem;
+  line-height: 2rem;
+}
+.clickableContentItem:hover {
+  font-size: 1.2rem;
+}
+.clickableContentItem:active {
+  font-size: 1rem;
 }
 
 a {
