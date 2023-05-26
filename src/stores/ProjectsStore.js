@@ -13,6 +13,7 @@ export const useProjectsDB = defineStore("mainState", {
     selectedDateIndex: 0,
     nodesGroupedByDateStart: [],
     nodesGroupedByDateEnd: [],
+    startNodesTopMarginArray: [],
     google: {},
     userLocation: {},
     saveOption: {storageType: "localStorage", name: "projectsDB"},

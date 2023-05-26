@@ -20,10 +20,7 @@
     <div class="splitter"></div>
 
     <div class="startNodes nodeButtonLinePart">
-      <DateNodesButtonsLine :handler="true" />
-    </div>
-    <div class="endNodes nodeButtonLinePart">
-      <DateNodesButtonsLine :handler="false" />
+      <DateNodesButtonsLine />
     </div>
   </div>
 </template>
