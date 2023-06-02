@@ -1,5 +1,5 @@
 <template>
-  <div class="dailyMainContainer" v-if="selectedProjectID !== '-1'">
+  <div class="dailyMainContainer" v-if="selectedProjectID !== -1">
     <div class="dailyPanel">
       <div class="upper">
         <div class="selectPanel">
@@ -7,7 +7,7 @@
             >🗓</span
           >
           <select v-model="selectedDateIndex" class="dateSelect">
-            <option selected disabled value="-1">Date</option>
+            <option selected disabled :value="-1">Date</option>
             <option
               v-for="(date, index) of selectedProjectNodesDates"
               :value="index"
@@ -36,18 +36,14 @@
         </div>
         <dailyInfo></dailyInfo>
       </div>
-      <div class="downer">
-        <dailyBrief></dailyBrief>
-      </div>
+      <dailyBrief class="downer"></dailyBrief>
     </div>
-    <div class="dailyLine">
-      <dailyLine />
-    </div>
+    <dailyLine />
   </div>
 </template>
 
 <script setup>
-import {watch, onBeforeMount, watchEffect} from "vue";
+import {watch, onBeforeMount} from "vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
 import {useRoute} from "vue-router";
@@ -60,14 +56,13 @@ const ProjectsDB = useProjectsDB();
 const {
   //deconstruct ProjectsDB
   selectedProjectID,
-  SelectedProjectNodes,
   selectedProjectNodesDates,
   selectedDateIndex,
 } = storeToRefs(ProjectsDB);
 
 onBeforeMount(() => {
   //initially fetch nodes data
-  selectedProjectID.value === "-1" &&
+  selectedProjectID.value === -1 &&
     (selectedProjectID.value = route.query.ProjectID);
   ProjectsDB.fetchSelectedProjectNodes();
 });
@@ -76,32 +71,31 @@ watch(
   //fetch new project's nodes when selected project changed
   () => selectedProjectID.value,
   (newValue) => {
-    if (newValue === "-1") return;
+    if (newValue === -1) return;
     console.log("Selected project changed");
     ProjectsDB.fetchSelectedProjectNodes();
   }
 );
 
-watch(
-  //save nodes data when nodes data changed
-  () => SelectedProjectNodes.value,
-  () => {
-    if (selectedProjectID.value === "-1") return;
-    //save nodes data
-    console.log(`node ${selectedProjectID.value} nodes data was changed`);
-    ProjectsDB.exportNodesDB();
-  },
-  {deep: true}
-);
+// watch(
+//   //save nodes data when nodes data changed
+//   () => selectedProjectNodes.value,
+//   () => {
+//     if (selectedProjectID.value === -1) return;
+//     //save nodes data
+//     console.log(`node ${selectedProjectID.value} nodes data was changed`);
+//     ProjectsDB.exportNodesDB();
+//   }
+// );
 </script>
 
 <style>
 .dailyMainContainer {
-  padding: 1rem;
-  width: 100%;
-  height: 100svh;
+  margin-left: var(--navWidth);
   display: grid;
   gap: 1rem;
+  width: calc(100svw - var(--navWidth));
+  height: 100svh;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr;
   color: var(--text-secondary);
@@ -118,10 +112,11 @@ watch(
   font-weight: 700;
 }
 .dailyPanel {
+  margin: var(--margin);
   display: grid;
-  height: 100%;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr 2fr;
+  gap: var(--margin);
 }
 .selectPanel {
   position: relative;

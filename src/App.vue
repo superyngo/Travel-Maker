@@ -1,9 +1,7 @@
 <template>
   <myNav></myNav>
-  <div class="main">
-    <router-view></router-view>
-  </div>
-  <editProject></editProject>
+  <router-view></router-view>
+  <editProject v-if="modalIsOpen[selectedProjectID]"></editProject>
 </template>
 
 <script setup>
@@ -17,7 +15,8 @@ import myNav from "./components/myNav.vue";
 
 const router = useRouter();
 const ProjectsDB = useProjectsDB();
-const {projectsDB, selectedProjectID} = storeToRefs(ProjectsDB);
+const {selectedProjectID, selectedProject, modalIsOpen} =
+  storeToRefs(ProjectsDB);
 
 onBeforeMount(async () => {
   ProjectsDB.fetchProjectDB();
@@ -26,7 +25,7 @@ onBeforeMount(async () => {
 });
 
 const routeToProject = function () {
-  if (selectedProjectID.value === "-1") {
+  if (selectedProjectID.value === -1) {
     router.push({
       name: "home",
     });
@@ -42,7 +41,7 @@ const initMap = async () => {
   const loader = new Loader({
     apiKey: "AIzaSyAUnQZuVbSFm-UyBkDX9W9atlfFZeKN-DM",
     version: "weekly",
-    libraries: ["places"],
+    libraries: ["places", "geometry"],
     language: "zh-TW",
   });
   ProjectsDB.google = await loader.load();
@@ -58,12 +57,40 @@ watch(
 
 watch(
   //save ProjectDB
-  () => projectsDB.value.length,
+  () => selectedProject.value?.nodesID,
   () => {
     console.log("ProjectsDB changed");
     ProjectsDB.exportProjectDB();
   }
+  // {deep: true}
 );
+const fetchDescription = async function (placeId) {
+  try {
+    const response = await fetch(
+      `https://www.google.com/maps/place/?q=place_id:${placeId}`
+    );
+    if (!response.ok) throw new Error("Network response was not ok");
+    const htmlString = await response.text();
+
+    // Create a new DOMParser
+    const parser = new DOMParser();
+
+    // Parse the HTML string into a DOM document
+    const doc = parser.parseFromString(htmlString, "text/html");
+
+    // Handle the parsed HTML document
+
+    const metaElement = doc.querySelector('meta[itemprop="description"]');
+
+    // Get the content attribute value of the <meta> element
+    const description = metaElement ? metaElement.getAttribute("content") : "";
+
+    return description;
+  } catch (error) {
+    console.error("Erroe:", error);
+    throw error;
+  }
+};
 </script>
 
 <style lan="scss">
@@ -79,6 +106,7 @@ watch(
   --text-secondary: #002b2f;
   --visual-primary: #4fffedc3;
   --visual-secondary: #1a4c47;
+  --margin: 1rem;
 }
 * {
   margin: 0;
@@ -93,12 +121,5 @@ watch(
 }
 *::-webkit-scrollbar-thumb {
   background-color: #bdc4c4;
-}
-.main {
-  /* position: relative; */
-  margin-left: var(--navWidth);
-  /* width: calc(100svw - var(--navWidth)); */
-  height: 100svh;
-  border: 2px solid red;
 }
 </style>

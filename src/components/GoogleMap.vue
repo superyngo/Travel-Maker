@@ -11,30 +11,48 @@
 
     <div :id="idProp + 'map'" ref="map" class="map"></div>
 
-    <div :id="idProp + 'infoWindow-contentDom'" class="infoWindow-contentDom">
+    <div
+      :id="idProp + 'infoWindow-contentDom'"
+      class="infoWindow-contentDom"
+      ref="infoWindowDom"
+    >
       <template v-for="item of state.infoWindowContent" :key="item.title">
-        <span v-if="item.tag === 'a' && item.href" class="clickableSpan">
-          <component
-            :is="item.tag"
-            :href="item.href"
-            target="_blank"
-            class="clickableContentItem"
-          >
-            <strong>{{ item.value }}</strong>
-          </component>
+        <span v-if="item.tag === 'a' && item.href" class="contentItem">
+          <span>{{ item.title }}</span>
+          <a :href="item.href" target="_blank">
+            <span>{{ item.value }}</span>
+          </a>
         </span>
-        <component :is="item.tag" v-if="item.tag === 'div' && item.value">
-          <strong>{{ item.title }}</strong> : {{ item.value }}
-        </component>
-        <span v-if="item.tag === 'button'" class="clickableSpan">
-          <component
-            :is="item.tag"
-            @click="item.click"
-            class="clickableContentItem"
-          >
-            <strong>{{ item.value }}</strong>
-          </component>
-        </span>
+        <div v-if="item.tag === 'div' && item.value" class="contentItem">
+          <span>{{ item.title }}</span>
+          <span class="contentItemLine" v-if="!item.strong">
+            {{ item.value }}
+          </span>
+          <strong class="contentItemLine" v-if="item.strong">
+            {{ item.value }}
+          </strong>
+        </div>
+        <div
+          v-if="item.tag === 'expand'"
+          class="contentItem"
+          @click="
+            state.infoWindowContent.openingTime.liShow =
+              !state.infoWindowContent.openingTime.liShow
+          "
+        >
+          <span>{{ item.title }}</span>
+          <span class="openTimeListWrapper" v-auto-animate>
+            <div class="firstLine">{{ item.value }}</div>
+            <ul
+              class="openTimeList"
+              v-if="state.infoWindowContent.openingTime.liShow"
+            >
+              <li v-for="li of item.li">
+                {{ li }}
+              </li>
+            </ul>
+          </span>
+        </div>
       </template>
     </div>
   </div>
@@ -43,59 +61,81 @@
 <script setup>
 import {onMounted, reactive, ref} from "vue";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
+import {vAutoAnimate} from "@formkit/auto-animate";
 const ProjectsDB = useProjectsDB();
 const map = ref(null);
+const infoWindowDom = ref(null);
 
 const state = reactive({
   map: null,
   markers: null,
   editMode: false,
   infoWindowContent: {
-    placename: {tag: "div", title: "Name", value: null, icon: null},
+    placename: {tag: "div", title: null, value: null, icon: null, strong: true},
+    description: {tag: "div", title: null, value: null, icon: null},
     address: {
       tag: "div",
-      title: "Address",
+      title: "📍",
       value: null,
-      icon: null,
     },
-    phone: {tag: "div", title: "Phone", value: null, icon: null},
+    phone: {tag: "div", title: "☎️", value: null, icon: null},
     openingTime: {
-      tag: "div",
-      title: "Open on",
+      tag: "expand",
+      title: "🕐",
       value: null,
-      icon: null,
-    },
-    rating: {
-      tag: "div",
-      title: "Rating",
-      value: null,
-      icon: null,
+      li: null,
+      liShow: false,
     },
     website: {
       tag: "a",
-      title: "Website",
-      value: "🔍",
-      icon: null,
+      title: "🌐",
+      value: "",
       href: null,
     },
     viewOnGoogleMaps: {
       tag: "a",
-      title: "Google Maps",
-      value: "🗺️",
-      icon: null,
+      title: "🗺️",
+      value: "view on Google Maps",
       href: null,
     },
   },
-  infoWindowDom: {},
-  choosePlaceInfo: {},
+  chosenPlace: {},
 });
 const props = defineProps({
   idProp: String,
   pickable: Boolean,
-  startPlaceId: String,
+  startPlace: Object,
 });
 
-const emits = defineEmits(["choose"]);
+const emits = defineEmits(["pick"]);
+
+const fetchDescription = async function (placeId) {
+  try {
+    const response = await fetch(
+      `https://www.google.com/maps/place/?q=place_id:${placeId}`
+    );
+    if (!response.ok) throw new Error("Network response was not ok");
+    const htmlString = await response.text();
+
+    // Create a new DOMParser
+    const parser = new DOMParser();
+
+    // Parse the HTML string into a DOM document
+    const doc = parser.parseFromString(htmlString, "text/html");
+    console.log("doc", doc);
+    // Handle the parsed HTML document
+
+    const metaElement = doc.querySelector('meta[itemprop="description"]');
+
+    // Get the content attribute value of the <meta> element
+    const description = metaElement ? metaElement.getAttribute("content") : "";
+    console.log(description);
+    return description;
+  } catch (error) {
+    console.error("Erroe:", error);
+    throw error;
+  }
+};
 
 function mapCenterControl(map, clickButton) {
   let centerControlDiv = document.createElement("div");
@@ -219,63 +259,41 @@ const setMap = async () => {
   const input = document.getElementById(props.idProp + "pac-input"); //set search bar to dom
   const searchBox = new ProjectsDB.google.maps.places.SearchBox(input); //start search box
   state.map.controls[ProjectsDB.google.maps.ControlPosition.TOP_CENTER].push(
-    //bind search box input to map
+    //put search box input to map
     input
   );
 
   const infowindow = new ProjectsDB.google.maps.InfoWindow({}); //start infoWindow
-  state.infoWindowDom = document.getElementById(
-    // bind infoWindows dom
-    props.idProp + "infoWindow-contentDom"
-  );
 
-  const getInfo = function (placeId) {
-    placeService.getDetails(
-      {
-        placeId: placeId,
-        fields: [
-          "place_id",
-          "name",
-          "type",
-          "formatted_phone_number",
-          "geometry",
-          "website",
-          "formatted_address",
-          "icon",
-          "rating",
-          "current_opening_hours",
-        ],
-      },
-      (place, status) => {
-        if (status === ProjectsDB.google.maps.places.PlacesServiceStatus.OK) {
-          setInfoWindowContent(place);
-          setMarkerWithInfowindow(place);
-        }
-      }
-    );
-  };
+  const setInfoWindowContentAndMarkerWithInfowindow = async function (place) {
+    //get description from Google Maps
+    const description = await fetchDescription(place.place_id);
 
-  const setInfoWindowContent = function (place) {
+    //fill content
     state.infoWindowContent.placeId = place.place_id;
+    state.infoWindowContent.description.value =
+      (place.rating || null) + " " + description;
     state.infoWindowContent.placename.value = place.name;
     state.infoWindowContent.address.value = place.formatted_address;
     state.infoWindowContent.phone.value = place.formatted_phone_number;
-    state.infoWindowContent.openingTime.value =
-      place.current_opening_hours?.weekday_text.join(" , ");
-    state.infoWindowContent.rating.value = place.rating;
-    state.infoWindowContent.website.href = place.website;
+    state.infoWindowContent.openingTime.value = place.current_opening_hours
+      ?.open_now
+      ? "營業中"
+      : "休息中";
+    state.infoWindowContent.openingTime.li =
+      place.current_opening_hours?.weekday_text;
+    const url = place.website ? new URL(place.website) : null;
+    state.infoWindowContent.website.href = url;
+    state.infoWindowContent.website.value = url?.hostname;
     state.infoWindowContent.viewOnGoogleMaps.href = `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
+    infoWindowDom.value.style.display = "inline";
 
-    state.infoWindowDom.style.display = "inline";
-  };
-
-  const setMarkerWithInfowindow = async function (place) {
+    //setMarkerWithInfowindow
     //pin marker with infoWindow
-    state.choosePlaceInfo = place;
-    console.log(place);
+    state.chosenPlace = place;
     smoothPanTo(state.map, place.geometry.location);
     state.map.setZoom(17);
-
+    console.log("mark", place);
     chosenPlaceMarker.setPlace({
       // Set the position of the marker using the place ID and location.
       placeId: place.place_id,
@@ -286,12 +304,17 @@ const setMap = async () => {
       infowindow.open(state.map);
     });
 
-    infowindow.setContent(state.infoWindowDom);
+    infowindow.setContent(infoWindowDom.value);
     infowindow.open(state.map, chosenPlaceMarker);
+
+    if (props.pickable) {
+      emits("pick", state.chosenPlace);
+    }
   };
 
-  if (props.startPlaceId) {
-    getInfo(props.startPlaceId);
+  if (props.startPlace) {
+    //set inital place
+    setInfoWindowContentAndMarkerWithInfowindow(props.startPlace);
   }
 
   let markers = [];
@@ -324,8 +347,7 @@ const setMap = async () => {
       case 0: //no places
         break;
       case 1: //1 place
-        setInfoWindowContent(places[0]);
-        setMarkerWithInfowindow(places[0]);
+        setInfoWindowContentAndMarkerWithInfowindow(places[0]);
         break;
       default: // Many places result
         markers.forEach((marker) => {
@@ -360,8 +382,7 @@ const setMap = async () => {
             })
           );
           markers[markers.length - 1].addListener("click", () => {
-            setInfoWindowContent(place);
-            setMarkerWithInfowindow(place);
+            setInfoWindowContentAndMarkerWithInfowindow(place);
           });
 
           if (place.geometry.viewport) {
@@ -385,7 +406,17 @@ const setMap = async () => {
     const placeId = event.placeId;
 
     placeId && // Get place details using the Place ID
-      getInfo(placeId);
+      placeService.getDetails(
+        {
+          placeId: placeId,
+          fields: ProjectsDB.fields,
+        },
+        (place, status) => {
+          if (status === ProjectsDB.google.maps.places.PlacesServiceStatus.OK) {
+            setInfoWindowContentAndMarkerWithInfowindow(place);
+          }
+        }
+      );
   });
 
   //travel function https://developers.google.com/maps/documentation/javascript/examples/directions-travel-modes
@@ -393,17 +424,7 @@ const setMap = async () => {
 
 onMounted(async () => {
   await ProjectsDB.waitUserLocation();
-  if (props.pickable) {
-    state.infoWindowContent.chooseThisPlace = {
-      tag: "button",
-      title: "Pick",
-      value: "🆗",
-      click: function pick() {
-        emits("pick", state.choosePlaceInfo);
-      },
-      icon: null,
-    };
-  }
+
   setMap();
 });
 </script>
@@ -449,23 +470,6 @@ onMounted(async () => {
 .infoWindow-contentDom {
   display: none;
 }
-.clickableSpan {
-  margin-top: 0.5rem;
-  position: relative;
-  display: inline-block;
-  height: 2rem;
-  width: 2rem;
-}
-.clickableContentItem {
-  position: absolute;
-  left: 0.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  background-color: transparent;
-  border: none;
-  height: 2rem;
-  line-height: 2rem;
-}
 .clickableContentItem:hover {
   font-size: 1.2rem;
 }
@@ -473,8 +477,23 @@ onMounted(async () => {
   font-size: 1rem;
 }
 
+.contentItem {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  cursor: pointer;
+  position: relative;
+}
+
+.contentItem:hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  filter: brightness(0.9);
+  z-index: 0;
+}
+
 a {
-  margin-right: 10px;
-  /* display: block; */
+  z-index: 1;
 }
 </style>

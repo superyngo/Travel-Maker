@@ -1,8 +1,4 @@
 <template>
-  <!-- <span>123</span>
-  <select style="display: flex">
-    <option>123</option>
-  </select> -->
   <div class="navbar">
     <ul class="navbar-nav">
       <li class="nav-item">
@@ -58,6 +54,7 @@ const {projectsDB, selectedProjectID, modalIsOpen, isNewMark} =
   storeToRefs(ProjectsDB);
 
 const openEditProject = function () {
+  if (selectedProjectID.value === -1) return;
   modalIsOpen.value[selectedProjectID.value] = true;
 };
 
@@ -111,7 +108,7 @@ const navBarItems = [
     tag: "button",
     value: "HOME",
     click: () => {
-      selectedProjectID.value = "-1";
+      selectedProjectID.value = -1;
     },
     viewBox: "0 0 576 512",
     iconPath:

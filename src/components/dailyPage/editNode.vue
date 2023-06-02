@@ -7,7 +7,7 @@
             :idProp="node.id"
             @pick="pick"
             :pickable="true"
-            :startPlaceId="state.tempNode.place_id"
+            :startPlace="state.tempNode.place"
           ></GoogleMap>
           <form class="editForm">
             <div class="firstWrapper innerWrappers">
@@ -20,11 +20,7 @@
               /></label>
               <label class="label2">
                 <span>Type:</span>
-                <select
-                  v-model="state.tempNode.type"
-                  value="-1"
-                  style="font-size: 1rem"
-                >
+                <select v-model="state.tempNode.type" style="font-size: 1rem">
                   <option selected disabled value="-1">
                     Select activity type
                   </option>
@@ -47,7 +43,7 @@
                 <label class="label15">
                   <span>start:</span>
                   <select v-model="state.tempNode.startTime[0]">
-                    <option selected disabled value="-1">
+                    <option selected disabled :value="null">
                       Choose start date
                     </option>
                     <option
@@ -63,7 +59,6 @@
                     auto-scroll
                     input-width="90%"
                     format="HH:mm"
-                    close-on-complete
                     :minute-interval="10"
                     v-model="state.tempNode.startTime[1]"
                   />
@@ -73,8 +68,8 @@
                 <label class="label15">
                   <span>end:</span>
                   <select v-model="state.tempNode.endTime[0]">
-                    <option selected disabled value="-1">
-                      Choose end date
+                    <option selected disabled :value="null">
+                      Choose end date or empty
                     </option>
                     <option
                       v-for="date of selectedProjectNodesDates"
@@ -82,7 +77,7 @@
                     >
                       {{ date }}
                     </option>
-                    <option value="null"></option>
+                    <option :value="null"></option>
                   </select>
                 </label>
                 <div class="label15">
@@ -99,7 +94,7 @@
             </div>
             <div class="thirdWrapper innerWrappers">
               <label class="label2">
-                <span>📫:</span>
+                <span>📍:</span>
                 <input
                   type="address"
                   placeholder="Address"
@@ -158,16 +153,17 @@ const state = reactive({
 });
 const {
   //deconstruct ProjectsDB
-  SelectedProjectNodes,
+  selectedProjectNodes,
   nodeType,
   selectedProjectNodesDates,
   modalIsOpen,
   isNewMark,
+  selectedProjectID,
 } = storeToRefs(ProjectsDB);
 const props = defineProps({
   node: Object,
 });
-const nodeIndex = SelectedProjectNodes.value.findIndex(
+const nodeIndex = selectedProjectNodes.value.findIndex(
   (node) => node.id === props.node.id
 );
 
@@ -176,9 +172,7 @@ onBeforeMount(() => {
 });
 
 const pick = function (place) {
-  console.log(place);
   const getType = function (placeType) {
-    console.log(placeType);
     if (placeType.includes("lodging")) {
       return nodeType.value[0];
     }
@@ -222,22 +216,37 @@ const submit = function () {
     state.tempNode.endTime[1] =
       state.tempNode.endTime[1].HH + ":" + state.tempNode.endTime[1].mm;
   }
-  console.log(state.tempNode.startTime[1]);
-  console.log(state.tempNode.endTime[1]);
-  console.log(state.tempNode.endTime[1].includes("HH"));
-  if (
-    (state.tempNode.endTime[1].length === 5 ||
-      state.tempNode.endTime[1] === "") &&
-    !state.tempNode.endTime[1].includes("HH") &&
-    !state.tempNode.endTime[1].includes("mm")
-  ) {
-    SelectedProjectNodes.value[nodeIndex] = ProjectsDB.deepCopyFunction(
-      state.tempNode
-    );
-    closeModel();
+  const regex = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
+  if (regex.test(state.tempNode.endTime[1]) && !state.tempNode.endTime[0]) {
+    alert("End time must be complete or empty");
     return;
   }
-  alert("Time must be complete");
+  if (
+    state.tempNode.endTime[0] &&
+    state.tempNode.endTime[1] &&
+    new Date(state.tempNode.endTime[0]) < new Date(state.tempNode.startTime[0])
+  ) {
+    alert("End time must be after start time");
+    return;
+  }
+
+  if (
+    state.tempNode.endTime[0] === state.tempNode.startTime[0] &&
+    state.tempNode.endTime[1] &&
+    ProjectsDB.timeToNumber(state.tempNode.endTime[1]) <
+      ProjectsDB.timeToNumber(state.tempNode.startTime[1])
+  ) {
+    alert("End time must be after start time");
+    return;
+  }
+  //confirm submit
+  selectedProjectNodes.value[nodeIndex] = ProjectsDB.deepCopyFunction(
+    state.tempNode
+  );
+  console.log(`node ${selectedProjectID.value} nodes data was changed`);
+  ProjectsDB.exportNodesDB();
+  closeModel();
+  return;
 };
 
 const cancel = function () {
@@ -257,20 +266,29 @@ const removeNode = function () {
   }
   if (handler()) {
     closeModel();
-    SelectedProjectNodes.value.splice(
-      SelectedProjectNodes.value.findIndex((node) => node.id === props.node.id),
+    selectedProjectNodes.value.splice(
+      selectedProjectNodes.value.findIndex((node) => node.id === props.node.id),
       1
     );
+    console.log(`node ${selectedProjectID.value} nodes data was changed`);
+    ProjectsDB.exportNodesDB();
   }
 };
 </script>
 
 <style scoped>
+.editWrapper {
+  height: 90svh;
+  width: 90svw;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 4fr 1fr;
+  gap: 0.5rem;
+}
 .editForm {
   display: grid;
   gap: 0.5rem;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 3fr 1fr;
   align-items: center;
 }
 .editForm input,
@@ -307,14 +325,6 @@ const removeNode = function () {
   flex-direction: column;
 }
 
-.editWrapper {
-  height: 90svh;
-  width: 90svw;
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 3fr 1fr;
-  gap: 0.5rem;
-}
 .buttonWrapper {
   display: flex;
   gap: 1rem;
