@@ -15,6 +15,7 @@ const state = {
   map: null,
   nodesPosition: [],
   nodeId: [],
+  nodeName: [],
   infoWindow: null,
   markers: [],
   polyline: [],
@@ -23,34 +24,6 @@ const state = {
 const props = defineProps({
   startPlace: Object,
 });
-
-const fetchDescription = async function (placeId) {
-  try {
-    const response = await fetch(
-      `https://www.google.com/maps/place/?q=place_id:${placeId}`
-    );
-    if (!response.ok) throw new Error("Network response was not ok");
-    const htmlString = await response.text();
-
-    // Create a new DOMParser
-    const parser = new DOMParser();
-
-    // Parse the HTML string into a DOM document
-    const doc = parser.parseFromString(htmlString, "text/html");
-    console.log("doc", doc);
-    // Handle the parsed HTML document
-
-    const metaElement = doc.querySelector('meta[itemprop="description"]');
-
-    // Get the content attribute value of the <meta> element
-    const description = metaElement ? metaElement.getAttribute("content") : "";
-    console.log(description);
-    return description;
-  } catch (error) {
-    console.error("Erroe:", error);
-    throw error;
-  }
-};
 
 const smoothPanTo = function (map, target, isCenter) {
   //smooth panTo
@@ -95,52 +68,6 @@ const setMap = async () => {
     }
   );
 
-  const setInfoWindowContentAndMarkerWithInfowindow = async function (place) {
-    //get description from Google Maps
-    const description = await fetchDescription(place.place_id);
-
-    //fill content
-    state.infoWindowContent.placeId = place.place_id;
-    state.infoWindowContent.description.value =
-      (place.rating || null) + " " + description;
-    state.infoWindowContent.placename.value = place.name;
-    state.infoWindowContent.address.value = place.formatted_address;
-    state.infoWindowContent.phone.value = place.formatted_phone_number;
-    state.infoWindowContent.openingTime.value = place.current_opening_hours
-      ?.open_now
-      ? "營業中"
-      : "休息中";
-    state.infoWindowContent.openingTime.li =
-      place.current_opening_hours?.weekday_text;
-    const url = place.website ? new URL(place.website) : null;
-    state.infoWindowContent.website.href = url;
-    state.infoWindowContent.website.value = url?.hostname;
-    state.infoWindowContent.viewOnGoogleMaps.href = `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
-    infoWindowDom.value.style.display = "inline";
-
-    //setMarkerWithInfowindow
-    //pin marker with infoWindow
-    state.chosenPlace = place;
-    smoothPanTo(state.map, place.geometry.location);
-    state.map.setZoom(17);
-    console.log("mark", place);
-    chosenPlaceMarker.setPlace({
-      // Set the position of the marker using the place ID and location.
-      placeId: place.place_id,
-      location: place.geometry.location,
-    });
-    chosenPlaceMarker.setVisible(true);
-    chosenPlaceMarker.addListener("click", () => {
-      infowindow.open(state.map);
-    });
-
-    infowindow.setContent(infoWindowDom.value);
-    infowindow.open(state.map, chosenPlaceMarker);
-
-    if (props.pickable) {
-      emits("pick", state.chosenPlace);
-    }
-  };
   state.infoWindow = new ProjectsDB.google.maps.InfoWindow();
 };
 
@@ -150,25 +77,27 @@ const initailPlace = function () {
   ProjectsDB.nodeSortedByTime[1][ProjectsDB.selectedDate]?.forEach(({node}) => {
     state.nodesPosition.push(node.geometry);
     state.nodeId.push(node.id);
+    state.nodeName.push(node.name);
   });
 };
 
 const setMarkers = function () {
-  state.markers.forEach((marker) => {
-    marker.setMap(null);
-  });
-  state.markers = [];
+  [state.markers, state.polyline, state.polylineDistanceMarker].forEach(
+    (item) => {
+      item.forEach((marker) => {
+        marker.setMap(null);
+      });
+      item = [];
+    }
+  );
 
-  state.polyline.forEach((polyline) => {
-    polyline.setMap(null);
-  });
-  state.polyline = [];
   // Create an info window to share between markers.
 
   const bounds = new ProjectsDB.google.maps.LatLngBounds();
 
   // Create the markers.
-  if (!state.nodesPosition) return;
+  console.log(state.nodesPosition);
+  if (!state.nodesPosition || !state.nodesPosition[0]) return;
   state.nodesPosition.forEach((position, i) => {
     state.markers[i] = new ProjectsDB.google.maps.Marker({
       position,
@@ -184,8 +113,8 @@ const setMarkers = function () {
     // Add a click listener for each marker, and set up the info window.
     state.markers[i].addListener("click", ({domEvent, latLng}) => {
       state.infoWindow.close();
-      state.infoWindow.setContent("123");
-      state.infoWindow.open(state.map, markers[i]);
+      state.infoWindow.setContent(state.nodeName[i]);
+      state.infoWindow.open(state.map, state.markers[i]);
     });
 
     if (i > 0) {
@@ -208,7 +137,6 @@ const setMarkers = function () {
         lat: (state.nodesPosition[i - 1].lat + position.lat) / 2,
         lng: (state.nodesPosition[i - 1].lng + position.lng) / 2,
       };
-      console.log(centerPosition);
 
       // Add a custom marker with the distance information
       state.polylineDistanceMarker[i] = new google.maps.Marker({
@@ -232,7 +160,7 @@ watch(
   () => {
     if (!state.map) return;
     initailPlace();
-    if (!state.markers) return;
+    if (!state.nodesPosition) return;
     setMarkers();
   }
 );
