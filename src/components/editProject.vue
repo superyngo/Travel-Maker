@@ -61,7 +61,6 @@ const {
   selectedProject,
   modalIsOpen,
   isNewMark,
-  fixedDate,
   selectedProjectIndex,
 } = storeToRefs(ProjectsDB);
 

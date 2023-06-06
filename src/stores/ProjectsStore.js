@@ -337,7 +337,7 @@ export const useProjectsDB = defineStore("mainState", {
     },
     getCurrentPositionAsync() {
       const fallbackPosition = {lat: 25.03746, lng: 121.564558};
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         if (navigator.geolocation) {
           let option = {
             enableAcuracy: false, // 提高精確度
@@ -359,6 +359,7 @@ export const useProjectsDB = defineStore("mainState", {
                 ", use fallback position"
               );
               this.userLocation = fallbackPosition;
+              reject();
             },
             option
           );

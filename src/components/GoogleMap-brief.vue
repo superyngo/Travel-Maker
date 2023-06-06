@@ -5,9 +5,8 @@
 </template>
 
 <script setup>
-import {onMounted, reactive, ref, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
-import {vAutoAnimate} from "@formkit/auto-animate";
 const ProjectsDB = useProjectsDB();
 const map = ref(null);
 
@@ -72,12 +71,14 @@ const setMap = async () => {
 };
 
 const initailPlace = function () {
-  state.nodesPosition = [];
-  state.nodeId = [];
+  [state.nodesPosition, state.nodeId, state.nodeName] = [[], [], []];
+
   ProjectsDB.nodeSortedByTime[1][ProjectsDB.selectedDate]?.forEach(({node}) => {
-    state.nodesPosition.push(node.geometry);
-    state.nodeId.push(node.id);
-    state.nodeName.push(node.name);
+    if (node.geometry) {
+      state.nodesPosition.push(node.geometry);
+      state.nodeId.push(node.id);
+      state.nodeName.push(node.name);
+    }
   });
 };
 
@@ -96,7 +97,6 @@ const setMarkers = function () {
   const bounds = new ProjectsDB.google.maps.LatLngBounds();
 
   // Create the markers.
-  console.log(state.nodesPosition);
   if (!state.nodesPosition || !state.nodesPosition[0]) return;
   state.nodesPosition.forEach((position, i) => {
     state.markers[i] = new ProjectsDB.google.maps.Marker({

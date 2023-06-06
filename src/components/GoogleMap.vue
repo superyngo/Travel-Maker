@@ -112,24 +112,28 @@ const emits = defineEmits(["pick"]);
 const fetchDescription = async function (placeId) {
   try {
     const response = await fetch(
-      `https://www.google.com/maps/place/?q=place_id:${placeId}`
+      `http://localhost:3000/api/places?placeid=${placeId}`
     );
-    if (!response.ok) throw new Error("Network response was not ok");
-    const htmlString = await response.text();
+    const description = await response.text();
+    // const response = await fetch(
+    //   `https://www.google.com/maps/place/?q=place_id:${placeId}`
+    // );
+    // if (!response.ok) throw new Error("Network response was not ok");
+    // const htmlString = await response.text();
 
-    // Create a new DOMParser
-    const parser = new DOMParser();
+    // // Create a new DOMParser
+    // const parser = new DOMParser();
 
-    // Parse the HTML string into a DOM document
-    const doc = parser.parseFromString(htmlString, "text/html");
-    console.log("doc", doc);
-    // Handle the parsed HTML document
+    // // Parse the HTML string into a DOM document
+    // const doc = parser.parseFromString(htmlString, "text/html");
+    // console.log("doc", doc);
+    // // Handle the parsed HTML document
 
-    const metaElement = doc.querySelector('meta[itemprop="description"]');
+    // const metaElement = doc.querySelector('meta[itemprop="description"]');
 
-    // Get the content attribute value of the <meta> element
-    const description = metaElement ? metaElement.getAttribute("content") : "";
-    console.log(description);
+    // // Get the content attribute value of the <meta> element
+    // const description = metaElement ? metaElement.getAttribute("content") : "";
+    // console.log(description);
     return description;
   } catch (error) {
     console.error("Erroe:", error);
@@ -314,6 +318,7 @@ const setMap = async () => {
 
   if (props.startPlace) {
     //set inital place
+    console.log(props.startPlace);
     setInfoWindowContentAndMarkerWithInfowindow(props.startPlace);
   }
 

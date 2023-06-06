@@ -116,9 +116,9 @@
               </label>
             </div>
             <div class="buttonWrapper">
-              <button type="submit" @click.prevent="submit">🆗</button>
-              <button type="submit" @click="cancel">❎</button>
-              <button @click.prevent="removeNode">
+              <button type="button" @click="submit()">🆗</button>
+              <button type="button" @click="cancel()">❎</button>
+              <button @click.prevent="removeNode()">
                 <svg
                   style="width: 1rem; display: block"
                   xmlns="http://www.w3.org/2000/svg"
@@ -141,6 +141,9 @@
 </template>
 
 <script setup>
+const test = function () {
+  console.log("test");
+};
 import {reactive, onBeforeMount} from "vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
@@ -201,7 +204,7 @@ const closeModel = function () {
 
 const submit = function () {
   if (!state.tempNode.startTime[0]) {
-    alert("Must fill start date and time!!");
+    alert("Must fill start date!!");
     return;
   }
 

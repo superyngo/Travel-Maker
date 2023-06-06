@@ -1,8 +1,26 @@
 <template>
+  <div class="dateTagContainer">
+    <div class="buttonContainer">
+      <button
+        v-for="(date, index) of selectedProjectNodesDates"
+        :value="index"
+        @click="
+          activeSelectedDateButton();
+          selectedDateIndex = index;
+        "
+        :key="date + index"
+        ref="dateButtonDom"
+      >
+        {{ date }}
+      </button>
+      <button @click="minusDate()">➖</button>
+      <button @click="plusDate()">➕</button>
+    </div>
+  </div>
   <div class="dailyMainContainer" v-if="selectedProjectID !== -1">
     <div class="dailyPanel">
       <div class="upper">
-        <div class="selectPanel">
+        <!-- <div class="selectPanel">
           <span class="emoji" style="font-size: 1.7rem; line-height: 1.6rem"
             >🗓</span
           >
@@ -33,7 +51,7 @@
               ➡️
             </button>
           </div>
-        </div>
+        </div> -->
         <dailyInfo></dailyInfo>
       </div>
       <dailyBrief class="downer"></dailyBrief>
@@ -43,7 +61,7 @@
 </template>
 
 <script setup>
-import {watch, onBeforeMount} from "vue";
+import {watch, onBeforeMount, ref, nextTick, onUpdated} from "vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
 import {useRoute} from "vue-router";
@@ -59,6 +77,62 @@ const {
   selectedProjectNodesDates,
   selectedDateIndex,
 } = storeToRefs(ProjectsDB);
+const dateButtonDom = ref([]);
+
+const activeSelectedDateButton = function () {
+  nextTick(() => {
+    dateButtonDom.value.forEach((button) => {
+      button.classList.remove("active");
+    });
+    dateButtonDom.value[selectedDateIndex.value].classList.add("active");
+  });
+};
+
+const plusDate = function () {
+  const date = new Date(
+    ProjectsDB.projectsDB[ProjectsDB.selectedProjectIndex].dateStartEnd[1]
+  );
+  date.setDate(date.getDate() + 1);
+  ProjectsDB.projectsDB[ProjectsDB.selectedProjectIndex].dateStartEnd[1] = date
+    .toISOString()
+    .slice(0, 10);
+  nextTick(() => {
+    // dateButtonDom.value[dateButtonDom.value.length - 1].focus();
+    selectedDateIndex.value = dateButtonDom.value.length - 1;
+    activeSelectedDateButton();
+  });
+
+  console.log(`node ${selectedProjectID.value} nodes data was changed`);
+  ProjectsDB.exportNodesDB();
+};
+
+const minusDate = function () {
+  const date = new Date(
+    ProjectsDB.projectsDB[ProjectsDB.selectedProjectIndex].dateStartEnd[1]
+  );
+  date.setDate(date.getDate() - 1);
+  ProjectsDB.projectsDB[ProjectsDB.selectedProjectIndex].dateStartEnd[1] = date
+    .toISOString()
+    .slice(0, 10);
+
+  nextTick(() => {
+    console.log(dateButtonDom.value.length, selectedDateIndex.value);
+    selectedDateIndex.value =
+      dateButtonDom.value.length - 1 < selectedDateIndex.value
+        ? selectedDateIndex.value - 1
+        : selectedDateIndex.value;
+    activeSelectedDateButton();
+  });
+  console.log(`node ${selectedProjectID.value} nodes data was changed`);
+  ProjectsDB.exportNodesDB();
+};
+
+onUpdated(() => {
+  // console.log("changed123456789");
+  // nextTick(() => {
+  //   dateButtonDom.value[selectedDateIndex.value].focus();
+  // });
+});
 
 onBeforeMount(() => {
   //initially fetch nodes data
@@ -74,6 +148,7 @@ watch(
     if (newValue === -1) return;
     console.log("Selected project changed");
     ProjectsDB.fetchSelectedProjectNodes();
+    activeSelectedDateButton();
   }
 );
 
@@ -90,15 +165,43 @@ watch(
 </script>
 
 <style>
+.dateTagContainer {
+  margin-left: calc(var(--navWidth) * 1.5);
+  width: calc(100svw - var(--navWidth));
+  height: 2rem;
+  position: relative;
+  > .buttonContainer {
+    position: absolute;
+    top: 0.64rem;
+    > button {
+      padding: 0 0.1rem;
+      border: none;
+      background-color: grey;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      margin: 0 0.1rem;
+      border: var(--button-border) solid black;
+      border-radius: 0;
+    }
+    > .active {
+      border: none;
+      background-color: white;
+      cursor: pointer;
+      border: var(--button-border) solid black;
+      border-bottom: var(--button-border) solid white;
+    }
+  }
+}
 .dailyMainContainer {
   margin-left: var(--navWidth);
   display: grid;
   gap: 1rem;
   width: calc(100svw - var(--navWidth));
-  height: 100svh;
+  height: 95svh;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr;
   color: var(--text-secondary);
+  border-top: var(--button-border) solid black;
 }
 .dailyMainContainer select,
 .dailyMainContainer option,
@@ -115,7 +218,7 @@ watch(
   margin: var(--margin);
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 1fr 2fr;
+  grid-template-rows: 1fr 6fr;
   gap: var(--margin);
 }
 .selectPanel {

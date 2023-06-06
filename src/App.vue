@@ -107,6 +107,7 @@ const fetchDescription = async function (placeId) {
   --visual-primary: #4fffedc3;
   --visual-secondary: #1a4c47;
   --margin: 1rem;
+  --button-border: 0.1rem;
 }
 * {
   margin: 0;
