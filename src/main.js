@@ -1,8 +1,8 @@
 import "/src/utils/modal.css";
 import {createApp} from "vue";
 import {createPinia} from "pinia";
-import App from "./App.vue";
-import router from "./router/router.js";
+import App from "/src/App.vue";
+import router from "/src/router/router.js";
 
 const app = createApp(App);
 const pinia = createPinia();

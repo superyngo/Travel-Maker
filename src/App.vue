@@ -64,33 +64,6 @@ watch(
   }
   // {deep: true}
 );
-const fetchDescription = async function (placeId) {
-  try {
-    const response = await fetch(
-      `https://www.google.com/maps/place/?q=place_id:${placeId}`
-    );
-    if (!response.ok) throw new Error("Network response was not ok");
-    const htmlString = await response.text();
-
-    // Create a new DOMParser
-    const parser = new DOMParser();
-
-    // Parse the HTML string into a DOM document
-    const doc = parser.parseFromString(htmlString, "text/html");
-
-    // Handle the parsed HTML document
-
-    const metaElement = doc.querySelector('meta[itemprop="description"]');
-
-    // Get the content attribute value of the <meta> element
-    const description = metaElement ? metaElement.getAttribute("content") : "";
-
-    return description;
-  } catch (error) {
-    console.error("Erroe:", error);
-    throw error;
-  }
-};
 </script>
 
 <style lan="scss">

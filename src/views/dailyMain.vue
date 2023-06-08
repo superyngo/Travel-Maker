@@ -8,7 +8,6 @@
           activeSelectedDateButton();
           selectedDateIndex = index;
         "
-        :key="date + index"
         ref="dateButtonDom"
       >
         {{ date }}
@@ -61,7 +60,7 @@
 </template>
 
 <script setup>
-import {watch, onBeforeMount, ref, nextTick, onUpdated} from "vue";
+import {watch, onBeforeMount, ref, nextTick, onMounted} from "vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
 import {useRoute} from "vue-router";
@@ -107,6 +106,12 @@ const plusDate = function () {
 };
 
 const minusDate = function () {
+  if (
+    ProjectsDB.projectsDB[ProjectsDB.selectedProjectIndex].dateStartEnd[0] ===
+    ProjectsDB.projectsDB[ProjectsDB.selectedProjectIndex].dateStartEnd[1]
+  )
+    return;
+
   const date = new Date(
     ProjectsDB.projectsDB[ProjectsDB.selectedProjectIndex].dateStartEnd[1]
   );
@@ -116,7 +121,6 @@ const minusDate = function () {
     .slice(0, 10);
 
   nextTick(() => {
-    console.log(dateButtonDom.value.length, selectedDateIndex.value);
     selectedDateIndex.value =
       dateButtonDom.value.length - 1 < selectedDateIndex.value
         ? selectedDateIndex.value - 1
@@ -127,11 +131,8 @@ const minusDate = function () {
   ProjectsDB.exportNodesDB();
 };
 
-onUpdated(() => {
-  // console.log("changed123456789");
-  // nextTick(() => {
-  //   dateButtonDom.value[selectedDateIndex.value].focus();
-  // });
+onMounted(() => {
+  activeSelectedDateButton();
 });
 
 onBeforeMount(() => {
@@ -172,7 +173,7 @@ watch(
   position: relative;
   > .buttonContainer {
     position: absolute;
-    top: 0.64rem;
+    top: 0.65rem;
     > button {
       padding: 0 0.1rem;
       border: none;
@@ -189,6 +190,9 @@ watch(
       cursor: pointer;
       border: var(--button-border) solid black;
       border-bottom: var(--button-border) solid white;
+    }
+    > button:hover {
+      filter: brightness(1.5);
     }
   }
 }

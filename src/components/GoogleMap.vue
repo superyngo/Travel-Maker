@@ -125,8 +125,6 @@ const fetchDescription = async function (placeId) {
     // const parser = new DOMParser();
 
     // // Parse the HTML string into a DOM document
-    // const doc = parser.parseFromString(htmlString, "text/html");
-    // console.log("doc", doc);
     // // Handle the parsed HTML document
 
     // const metaElement = doc.querySelector('meta[itemprop="description"]');
@@ -135,9 +133,10 @@ const fetchDescription = async function (placeId) {
     // const description = metaElement ? metaElement.getAttribute("content") : "";
     // console.log(description);
     return description;
-  } catch (error) {
-    console.error("Erroe:", error);
-    throw error;
+  } finally {
+    // catch (error) {
+    //   console.error("Error:", error);
+    return "stars";
   }
 };
 
