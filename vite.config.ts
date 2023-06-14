@@ -13,6 +13,6 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "D:/Users/super/OneDrive/文件/0_Project/20230607_TravelMateBuild",
+    outDir: "./site",
   },
 });
