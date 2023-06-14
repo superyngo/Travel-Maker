@@ -238,7 +238,7 @@ const setMarkers = function () {
         map: state.map,
         directions: response,
         suppressMarkers: true,
-        draggable: true,
+        draggable: false,
       });
     } else {
       // Handle the error case
