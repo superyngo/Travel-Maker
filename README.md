@@ -1,4 +1,4 @@
-I have been learning JavaScript since March of this year (2023), mainly by following an online course on CodeLove 愛寫扣論壇. Gradually, I acquired a basic understanding of HTML, CSS, and JavaScript.
+I have been learning JavaScript since March of this year (2023), mainly by following an online course on [CodeLove 愛寫扣論壇](https://codelove.tw/). Gradually, I acquired a basic understanding of HTML, CSS, and JavaScript.
 
 By May, I had completed the entire course and decided to utilize my newfound knowledge to develop a web app. Creating such an app has always been a goal of mine, as I have been using Google Maps for travel planning for many years.
 
