@@ -1,22 +1,23 @@
-I tried to learned javascript since March this year(2023) mainly following [CodeLove 愛寫扣論壇](https://codelove.tw/)'s online course and gradually learned HTML/CSS/Javascript basic knowledge.
-I finished all the course by May and decided to use all I can to make a web app.
+I have been learning JavaScript since March of this year (2023), mainly by following an online course on CodeLove 愛寫扣論壇. Gradually, I acquired a basic understanding of HTML, CSS, and JavaScript.
 
-Since I've been using Google Maps for travel planning for many years, making such an app is always what I wanna do.
+By May, I had completed the entire course and decided to utilize my newfound knowledge to develop a web app. Creating such an app has always been a goal of mine, as I have been using Google Maps for travel planning for many years.
 
-Also as a newbie I really have no idea of and "proper procedure of developing". I just tried do solve any problem on the way to achieve what I might want, while figuring out what I really want.
+As a newbie, I am unfamiliar with the proper procedures of development. Therefore, I simply attempted to solve any problems I encountered along the way, striving to achieve my desired outcome and clarifying my objectives.
 
-The consequence is apparently many repeated work, however I do learned many things on the way.
+Consequently, I ended up performing several tasks repeatedly. However, I did learn a great deal throughout this process.
 
-Stuff I used or reference in this project:  
-Vue.js 3  
-Vue Router  
-Pinia  
-Vite  
-Vue3 Timepicker [BETA]  
-Font Awesome  
-Fireship [Animated Responsive Navbar with CSS - Plus Other Useful Tricks](https://www.youtube.com/watch?v=biOMz4puGt8&t=590s)
+The following are the tools and resources I used or referenced during this project:
 
-Things I might do:  
-Authentication  
-Data Base  
-daily navigation route
+    Vue.js 3
+    Vue Router
+    Pinia
+    Vite
+    vue3-timepicker [BETA] (https://www.npmjs.com/package/vue3-timepicker)
+    Font Awesome
+    Fireship's [Animated Responsive Navbar with CSS - Plus Other Useful Tricks](https://www.youtube.com/watch?v=biOMz4puGt8&t=590s)
+    ChatGPT
+
+Additionally, there are a few things I plan to implement in the future:
+
+    Authentication
+    Database integration

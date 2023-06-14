@@ -111,10 +111,10 @@ const emits = defineEmits(["pick"]);
 
 const fetchDescription = async function (placeId) {
   try {
-    const response = await fetch(
-      `http://localhost:3000/api/places?placeid=${placeId}`
-    );
-    const description = await response.text();
+    // const response = await fetch(
+    //   `http://localhost:3000/api/places?placeid=${placeId}`
+    // );
+    const description = null;
     // const response = await fetch(
     //   `https://www.google.com/maps/place/?q=place_id:${placeId}`
     // );
@@ -214,7 +214,7 @@ const setMap = async () => {
   state.map = new ProjectsDB.google.maps.Map(
     map.value, //set map to Dom
     {
-      center: ProjectsDB.userLocation,
+      center: props.startPlace?.geometry.location ?? ProjectsDB.userLocation,
       zoom: 15,
       mapTypeControl: false,
     }
@@ -317,7 +317,6 @@ const setMap = async () => {
 
   if (props.startPlace) {
     //set inital place
-    console.log(props.startPlace);
     setInfoWindowContentAndMarkerWithInfowindow(props.startPlace);
   }
 
