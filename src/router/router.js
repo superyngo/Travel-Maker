@@ -4,13 +4,13 @@ import home from "/src/views/home.vue";
 
 const routes = [
   {
-    path: "/travelMaker/",
+    path: "Travel-Maker/",
     name: "root",
     component: home,
   },
   {
     path: "/index.html",
-    redirect: {path: "/travelMaker/"},
+    redirect: {path: "Travel-Maker/"},
     name: "home",
     component: home,
   },
