@@ -65,9 +65,9 @@ const {
 </script>
 
 <style scoped>
-.dailyInfoContainer {
-}
 .infoText {
   margin-left: 0.5rem;
+}
+.dailyInfoContainer {
 }
 </style>

@@ -1,61 +1,65 @@
 <template>
-  <div class="dateTagContainer">
-    <div class="buttonContainer">
-      <button
-        v-for="(date, index) of selectedProjectNodesDates"
-        :value="index"
-        @click="
-          activeSelectedDateButton();
-          selectedDateIndex = index;
-        "
-        ref="dateButtonDom"
-      >
-        {{ date }}
-      </button>
-      <button @click="minusDate()">➖</button>
-      <button @click="plusDate()">➕</button>
-    </div>
-  </div>
-  <div class="dailyMainContainer" v-if="selectedProjectID !== -1">
-    <div class="dailyPanel">
-      <div class="upper">
-        <!-- <div class="selectPanel">
-          <span class="emoji" style="font-size: 1.7rem; line-height: 1.6rem"
-            >🗓</span
-          >
-          <select v-model="selectedDateIndex" class="dateSelect">
-            <option selected disabled :value="-1">Date</option>
-            <option
-              v-for="(date, index) of selectedProjectNodesDates"
-              :value="index"
-            >
-              {{ date }}
-            </option>
-          </select>
-          <div class="selectedDateButton">
-            <button
-              @click="
-                selectedDateIndex > 0 ? selectedDateIndex-- : selectedDateIndex
-              "
-            >
-              ⬅️
-            </button>
-            <button
-              @click="
-                selectedDateIndex < selectedProjectNodesDates.length - 1
-                  ? selectedDateIndex++
-                  : selectedDateIndex
-              "
-            >
-              ➡️
-            </button>
-          </div>
-        </div> -->
-        <dailyInfo></dailyInfo>
+  <div class="viewContainer">
+    <div class="dateTagContainer">
+      <div class="buttonContainer">
+        <button
+          v-for="(date, index) of selectedProjectNodesDates"
+          :value="index"
+          @click="
+            activeSelectedDateButton();
+            selectedDateIndex = index;
+          "
+          ref="dateButtonDom"
+        >
+          {{ date }}
+        </button>
+        <button @click="minusDate()">➖</button>
+        <button @click="plusDate()">➕</button>
       </div>
-      <dailyBrief class="downer"></dailyBrief>
     </div>
-    <dailyLine />
+    <div class="dailyMainContainer" v-if="selectedProjectID !== -1">
+      <div class="dailyPanel left">
+        <div class="upper">
+          <div class="selectPanel">
+            <span class="emoji" style="font-size: 1.7rem; line-height: 1.6rem"
+              >🗓</span
+            >
+            <select v-model="selectedDateIndex" class="dateSelect">
+              <option selected disabled :value="-1">Date</option>
+              <option
+                v-for="(date, index) of selectedProjectNodesDates"
+                :value="index"
+              >
+                {{ date }}
+              </option>
+            </select>
+            <div class="selectedDateButton">
+              <button
+                @click="
+                  selectedDateIndex > 0
+                    ? selectedDateIndex--
+                    : selectedDateIndex
+                "
+              >
+                ⬅️
+              </button>
+              <button
+                @click="
+                  selectedDateIndex < selectedProjectNodesDates.length - 1
+                    ? selectedDateIndex++
+                    : selectedDateIndex
+                "
+              >
+                ➡️
+              </button>
+            </div>
+          </div>
+          <dailyInfo></dailyInfo>
+        </div>
+        <dailyBrief class="downer"></dailyBrief>
+      </div>
+      <dailyLine class="right" />
+    </div>
   </div>
 </template>
 
@@ -165,14 +169,34 @@ watch(
 // );
 </script>
 
-<style>
-.dateTagContainer {
-  margin-left: calc(var(--navWidth) * 1.5);
-  width: calc(100svw - var(--navWidth));
-  height: 2rem;
+<style scoped>
+.viewContainer {
+  border: 5px solid rgb(113, 15, 95);
   position: relative;
-  > .buttonContainer {
+}
+/* large screen */
+@media only screen and (min-width: 600px) {
+  .viewContainer {
+    left: var(--navWidth);
+    position: relative;
+    width: calc(100svw - var(--navWidth));
+    height: 100%;
+  }
+}
+/* small screen */
+@media only screen and (max-width: 600px) {
+  .viewContainer {
     position: absolute;
+    width: 100%;
+    height: calc(100svh - var(--navWidth));
+  }
+}
+.dateTagContainer {
+  height: 2rem;
+  width: 100%;
+  position: absolute;
+  > .buttonContainer {
+    position: relative;
     top: 0.65rem;
     > button {
       padding: 0 0.1rem;
@@ -197,12 +221,18 @@ watch(
   }
 }
 .dailyMainContainer {
-  margin-left: var(--navWidth);
+  position: absolute;
+  top: 2rem;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  border: 5px solid black;
+  /* position: relative; */
   display: grid;
   gap: 1rem;
-  width: calc(100svw - var(--navWidth));
-  height: 95svh;
-  grid-template-columns: 1fr 1fr;
+  /* width: calc(100svw - var(--navWidth)); */
+  /* height: 95svh; */
+  grid-template-columns: 2fr 1fr;
   grid-template-rows: 1fr;
   color: var(--text-secondary);
   border-top: var(--button-border) solid black;
@@ -222,7 +252,7 @@ watch(
   margin: var(--margin);
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 1fr 6fr;
+  grid-template-rows: 1fr 3fr;
   gap: var(--margin);
 }
 .selectPanel {
@@ -252,5 +282,11 @@ watch(
 }
 .dailyMainContainer button:active {
   scale: 0.9;
+}
+.mapView {
+  height: 100%;
+}
+.upper {
+  max-height: 200px;
 }
 </style>

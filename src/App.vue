@@ -1,7 +1,9 @@
 <template>
-  <myNav></myNav>
-  <router-view></router-view>
-  <editProject v-if="modalIsOpen[selectedProjectID]"></editProject>
+  <div class="appContainer">
+    <myNav></myNav>
+    <router-view></router-view>
+    <editProject v-if="modalIsOpen[selectedProjectID]"></editProject>
+  </div>
 </template>
 
 <script setup>
@@ -66,4 +68,10 @@ watch(
 );
 </script>
 
-<style lan="css"></style>
+<style>
+.appContainer {
+  position: relative;
+  width: 100svw;
+  height: 100svh;
+}
+</style>

@@ -12,7 +12,7 @@ const ProjectsDB = useProjectsDB();
 </script>
 <style>
 .briefContainer {
-  border-top: 1px solid black;
+  border: 1px solid black;
   height: 100%;
 }
 </style>

@@ -22,7 +22,6 @@
         />
       </svg>
     </button>
-
     <dateNodesButtonsLine />
   </div>
 </template>
@@ -80,17 +79,11 @@ const newNode = function () {
 
 <style scoped>
 .mainLineContainer {
+  /* border: 10px solid blue; */
+  /* height: 10%; */
   margin: var(--margin);
   position: relative;
   display: grid;
-  display: grid;
-}
-.splitter {
-  left: 50%;
-  position: absolute;
-  border: 1px solid var(--text-secondary);
-  height: calc(100% - var(--margin) * 2);
-  margin-top: var(--margin);
 }
 .newNodeButton {
   position: absolute;
