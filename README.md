@@ -24,3 +24,4 @@ Additionally, there are a few things I plan to implement in the future:
     draggable buttons to adjust activity time
     draggable marks on brief map to adjust activity destination
     Add place to journey direct from brief map
+    export and share journey
