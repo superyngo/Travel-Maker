@@ -150,7 +150,7 @@ const navBarItems = [
 .navSelect {
   display: flex;
   align-items: center;
-  height: 5rem;
+  height: var(--navWidth);
   text-decoration: none;
   font-size: 1rem;
   width: 100%;

@@ -1,21 +1,19 @@
 <template>
   <div class="viewContainer">
-    <div class="dateTagContainer">
-      <div class="buttonContainer">
-        <button
-          v-for="(date, index) of selectedProjectNodesDates"
-          :value="index"
-          @click="
-            activeSelectedDateButton();
-            selectedDateIndex = index;
-          "
-          ref="dateButtonDom"
-        >
-          {{ date }}
-        </button>
-        <button @click="minusDate()">➖</button>
-        <button @click="plusDate()">➕</button>
-      </div>
+    <div class="buttonContainer">
+      <button
+        v-for="(date, index) of selectedProjectNodesDates"
+        :value="index"
+        @click="
+          activeSelectedDateButton();
+          selectedDateIndex = index;
+        "
+        ref="dateButtonDom"
+      >
+        {{ date }}
+      </button>
+      <button @click="minusDate()">➖</button>
+      <button @click="plusDate()">➕</button>
     </div>
     <div class="dailyMainContainer" v-if="selectedProjectID !== -1">
       <div class="dailyPanel left">
@@ -191,33 +189,31 @@ watch(
     height: calc(100svh - var(--navWidth));
   }
 }
-.dateTagContainer {
+.buttonContainer {
   height: 2rem;
   width: 100%;
   position: absolute;
-  > .buttonContainer {
-    position: relative;
-    top: 0.65rem;
-    > button {
-      padding: 0 0.1rem;
-      border: none;
-      background-color: grey;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      margin: 0 0.1rem;
-      border: var(--button-border) solid black;
-      border-radius: 0;
-    }
-    > .active {
-      border: none;
-      background-color: white;
-      cursor: pointer;
-      border: var(--button-border) solid black;
-      border-bottom: var(--button-border) solid white;
-    }
-    > button:hover {
-      filter: brightness(1.5);
-    }
+  /* top: 0.65rem; */
+  border: var(--button-border) solid black;
+  display: flex;
+  overflow: auto;
+  > button {
+    padding: 0.1rem;
+    border: none;
+    background-color: grey;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    margin: auto 0.1rem 0;
+    border: var(--button-border) solid black;
+    border-bottom: none;
+    border-radius: 0;
+  }
+  > .active {
+    background-color: white;
+    cursor: pointer;
+  }
+  > button:hover {
+    filter: brightness(1.5);
   }
 }
 .dailyMainContainer {
@@ -226,16 +222,11 @@ watch(
   bottom: 0;
   right: 0;
   left: 0;
-  /* border: 5px solid black; */
-  /* position: relative; */
   display: grid;
   gap: 1rem;
-  /* width: calc(100svw - var(--navWidth)); */
-  /* height: 95svh; */
   grid-template-columns: 2fr 1fr;
   grid-template-rows: 1fr;
   color: var(--text-secondary);
-  border-top: var(--button-border) solid black;
 }
 .dailyMainContainer select,
 .dailyMainContainer option,

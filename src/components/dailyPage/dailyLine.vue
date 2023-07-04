@@ -79,8 +79,6 @@ const newNode = function () {
 
 <style scoped>
 .mainLineContainer {
-  /* border: 10px solid blue; */
-  /* height: 10%; */
   margin: var(--margin);
   position: relative;
   display: grid;
