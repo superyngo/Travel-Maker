@@ -15,7 +15,7 @@ import myNav from "./components/myNav.vue";
 
 const router = useRouter();
 const ProjectsDB = useProjectsDB();
-const {selectedProjectID, selectedProject, modalIsOpen} =
+const {selectedProjectID, selectedProject, modalIsOpen, apiKey} =
   storeToRefs(ProjectsDB);
 
 onBeforeMount(async () => {
@@ -39,7 +39,7 @@ const routeToProject = function () {
 
 const initMap = async () => {
   const loader = new Loader({
-    apiKey: "AIzaSyAUnQZuVbSFm-UyBkDX9W9atlfFZeKN-DM",
+    apiKey: apiKey.value,
     version: "weekly",
     libraries: ["places", "geometry"],
     language: "zh-TW",
@@ -66,34 +66,4 @@ watch(
 );
 </script>
 
-<style lan="scss">
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap");
-:root {
-  font-size: 16px;
-  font-family: "Noto Sans TC", sans-serif;
-  --transition-speed: 600ms;
-  --navWidth: 5rem;
-  --bg-primary: #23232e;
-  --bg-secondary: #141418;
-  --text-primary: #f0eeee;
-  --text-secondary: #002b2f;
-  --visual-primary: #4fffedc3;
-  --visual-secondary: #1a4c47;
-  --margin: 1rem;
-  --button-border: 0.1rem;
-}
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-*::-webkit-scrollbar {
-  width: 0.25rem;
-}
-*::-webkit-scrollbar-track {
-  background-color: #1e1e24;
-}
-*::-webkit-scrollbar-thumb {
-  background-color: #bdc4c4;
-}
-</style>
+<style lan="css"></style>

@@ -16,7 +16,7 @@
               {{ project?.name }}
             </option>
           </select>
-          <span class="logo">
+          <label for="selectedProjectID" class="logo">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
               <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
               <path
@@ -24,7 +24,7 @@
                 d="M470.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 256 265.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160zm-352 160l160-160c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L210.7 256 73.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0z"
               />
             </svg>
-          </span>
+          </label>
         </div>
       </li>
       <li class="nav-item" v-for="item of navBarItems">
@@ -120,19 +120,9 @@ const navBarItems = [
 <style scoped>
 .navbar {
   position: absolute;
-  height: 100svh;
   background-color: var(--bg-primary);
-  width: var(--navWidth);
-  height: 100%;
   transition: width var(--transition-speed) ease;
   z-index: 1;
-}
-.navbar:hover {
-  width: 16rem;
-}
-
-.navbar:hover .li-text {
-  display: block;
 }
 
 .navbar-nav {
@@ -181,9 +171,7 @@ svg {
   rotate: 0deg;
   transition: var(--transition-speed);
 }
-.navbar:hover .logo {
-  rotate: -180deg;
-}
+
 .li-text {
   display: none;
   margin-left: 2rem;
@@ -191,5 +179,37 @@ svg {
 
 path {
   color: var(--visual-primary);
+}
+
+/* for small screen */
+@media only screen and (max-width: 600px) {
+  .navbar {
+    bottom: 0;
+    height: var(--navWidth);
+    width: 100%;
+    /* width: 100swh; */
+  }
+  .navbar-nav {
+    flex-direction: row;
+  }
+}
+
+/* for large screen */
+@media only screen and (min-width: 600px) {
+  .navbar {
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    width: var(--navWidth);
+  }
+  .navbar:hover {
+    width: 16rem;
+  }
+  .navbar:hover .li-text {
+    display: inline;
+  }
+  .navbar:hover .logo {
+    rotate: -180deg;
+  }
 }
 </style>

@@ -14,6 +14,7 @@ export const useProjectsDB = defineStore("mainState", {
     google: {},
     userLocation: {},
     saveOption: {storageType: "localStorage", name: "projectsDB"},
+    apiKey: "AIzaSyAUnQZuVbSFm-UyBkDX9W9atlfFZeKN-DM",
   }),
 
   getters: {

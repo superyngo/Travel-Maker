@@ -1,4 +1,4 @@
-import "/src/utils/modal.css";
+import "/src/assets/main.css";
 import {createApp} from "vue";
 import {createPinia} from "pinia";
 import App from "/src/App.vue";
