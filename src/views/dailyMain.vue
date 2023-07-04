@@ -171,7 +171,7 @@ watch(
 
 <style scoped>
 .viewContainer {
-  border: 5px solid rgb(113, 15, 95);
+  /* border: 5px solid rgb(113, 15, 95); */
   position: relative;
 }
 /* large screen */
@@ -226,7 +226,7 @@ watch(
   bottom: 0;
   right: 0;
   left: 0;
-  border: 5px solid black;
+  /* border: 5px solid black; */
   /* position: relative; */
   display: grid;
   gap: 1rem;
