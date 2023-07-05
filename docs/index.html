@@ -7,13 +7,70 @@
       name="description"
       content="A side project to use Google maps to make your travel plans"
     />
+
     <title>Travel Maker</title>
-    <script type="module" crossorigin src="./assets/index-2b0991fe.js"></script>
-    <link rel="stylesheet" href="./assets/index-20a69af5.css">
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({"gtm.start": new Date().getTime(), event: "gtm.js"});
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-N8M5XR8");
+    </script>
+    <!-- End Google Tag Manager -->
+    
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <script type="module" crossorigin src="./assets/index-365b1e30.js"></script>
+    <link rel="stylesheet" href="./assets/index-af7d84a4.css">
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Google Tag Manager (noscript)-->
+    <noscript>
+      <iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-PGQ9WQT"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe>
+    </noscript>
 
-    
+    <!--  背景圖  -->
+    <main class="full-block">
+      <!--  主要內容  -->
+      <div class="main-block">
+        <!--  顯示區塊  -->
+        <section class="mainApp">
+          <div id="app"></div>
+        </section>
+      </div>
+    </main>
+
+    <div class="myNav">
+      <iframe
+        src="https://superyngo.github.io/myNavbar/"
+        width="100%"
+        frameborder="0"
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    <div class="github">
+      <a href="https://github.com/superyngo/Travel-Maker">
+        <i class="fa fa-github" aria-hidden="true"></i>
+      </a>
+    </div>
   </body>
 </html>

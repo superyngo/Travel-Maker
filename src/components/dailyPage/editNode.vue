@@ -263,7 +263,7 @@ const cancel = function () {
 
 const removeNode = function () {
   let handler = () =>
-    confirm(`Are you sure you want to remove ${props.node.id}`);
+    confirm(`Are you sure you want to remove ${props.node.name}`);
   if (isNewMark.value[props.node.id]) {
     handler = () => true;
   }

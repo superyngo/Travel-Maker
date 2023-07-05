@@ -1,7 +1,9 @@
 <template>
   <div class="viewContainer">
     <div class="buttonContainer">
+      <div class="buttonContainerBottomLine"></div>
       <button
+        class="dateButton"
         v-for="(date, index) of selectedProjectNodesDates"
         :value="index"
         @click="
@@ -194,22 +196,34 @@ watch(
   width: 100%;
   position: absolute;
   /* top: 0.65rem; */
-  border: var(--button-border) solid black;
   display: flex;
   overflow: auto;
+  > .buttonContainerBottomLine {
+    inset: 0 0 0 0;
+    position: absolute;
+    border-bottom: var(--button-border) solid black;
+    z-index: -1;
+  }
   > button {
-    padding: 0.1rem;
+    bottom: 10px;
+    font-size: 0.5rem;
+    /* line-height: 1.5; */
+    padding: 0.2rem;
     border: none;
     background-color: grey;
     border-radius: 0.5rem;
     cursor: pointer;
     margin: auto 0.1rem 0;
     border: var(--button-border) solid black;
-    border-bottom: none;
+    border-bottom: var(--button-border) solid black;
     border-radius: 0;
+  }
+  > .dateButton {
+    min-width: 5rem;
   }
   > .active {
     background-color: white;
+    border-bottom: var(--button-border) solid white;
     cursor: pointer;
   }
   > button:hover {

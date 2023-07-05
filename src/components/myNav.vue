@@ -21,12 +21,7 @@
               {{ project?.name }}
             </option>
           </select>
-          <span
-            for="selectedProjectID"
-            class="logo"
-            ref="logo"
-            onclick="selectedProjectIDPanel.active()"
-          >
+          <span for="selectedProjectID" class="logo" ref="logo">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
               <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
               <path
@@ -57,7 +52,6 @@
   </div>
 </template>
 <script setup>
-import {ref, nextTick} from "vue";
 import {storeToRefs} from "pinia";
 import {useProjectsDB} from "/src/stores/ProjectsStore.js";
 const ProjectsDB = useProjectsDB();
@@ -161,6 +155,18 @@ const navBarItems = [
   outline: none;
   border: none;
   cursor: pointer;
+  > svg {
+    width: 2rem;
+    margin: 0 1.5rem;
+  }
+  > .logo {
+    rotate: 0deg;
+    transition: var(--transition-speed);
+    > svg {
+      width: 2rem;
+      margin: 0 1.5rem;
+    }
+  }
 }
 .nav-item-inner:hover,
 .nav-item-inner:hover .navSelect {
@@ -172,15 +178,6 @@ const navBarItems = [
   text-transform: uppercase;
   text-align: center;
   letter-spacing: 0.2ch;
-}
-
-svg {
-  width: 2rem;
-  margin: 0 1.5rem;
-}
-.logo {
-  rotate: 0deg;
-  transition: var(--transition-speed);
 }
 
 .li-text {
