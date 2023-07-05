@@ -14,6 +14,7 @@
   --visual-secondary: #1a4c47;
   --margin: 1rem;
   --button-border: 0.1rem;
+  --media-screen-size: 768px;
 }
 * {
   margin: 0;
@@ -70,7 +71,10 @@ body {
   color: #fff;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 600px) {
+  :root {
+    font-size: 12px;
+  }
   .github {
     width: 70px;
     height: 70px;
