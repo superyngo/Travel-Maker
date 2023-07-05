@@ -17,7 +17,7 @@
   width: fit-content;
   height: fit-content;
   font-size: 5rem;
-  /* position: absolute; */
+  position: absolute;
   inset: 0;
   margin: auto;
   z-index: -1;
