@@ -190,7 +190,7 @@ path {
 }
 
 /* for small screen */
-@media only screen and (max-width: 700px) {
+@media only screen and (max-width: 600px) {
   .navbar {
     bottom: 0;
     height: var(--navWidth);
@@ -214,7 +214,7 @@ path {
 }
 
 /* for large screen */
-@media only screen and (min-width: 700px) {
+@media only screen and (min-width: 600px) {
   .navbar {
     top: 0;
     height: 100vh;
